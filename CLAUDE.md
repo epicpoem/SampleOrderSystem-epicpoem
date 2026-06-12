@@ -133,32 +133,37 @@ data/           # JSON 저장 파일
 WORKLOG 파일 위치: `Document/WORKLOG.md`
 
 ```
-1. 작업 시작 전  → Document/WORKLOG.md 열어 최신 리뷰/지시사항 확인
-2. 작업 및 커밋  → 기능 단위로 커밋
-3. WORKLOG 업데이트 → 작업 내용 요약, 커밋 해시, 리뷰 요청사항 기록
-4. WORKLOG 커밋  → "docs: update WORKLOG" 메시지로 커밋 및 푸시
-5. 사용자 리뷰   → 사용자가 WORKLOG에 피드백/다음 지시 작성 후 커밋
-6. 1번으로 반복
+1. 작업 시작 전     → Document/WORKLOG.md 열어 최신 [USER-Review] 내용 확인
+2. 작업 및 커밋     → 기능 단위로 [AI-xxx] 헤더로 커밋
+3. WORKLOG 업데이트 → 작업 내용 요약, 커밋 해시, 리뷰 요청사항 기록 (커밋 안 함)
+4. 사용자 리뷰      → 사용자가 WORKLOG에 피드백/다음 지시 작성
+5. 커밋 요청        → 사용자가 커밋 요청 시, Agent가 [USER-Review] 헤더로 커밋 및 푸시
+6. 다음 작업        → [USER-Review] 내용 기반으로 작업 후 [AI-xxx] 커밋
+7. 3번으로 반복
 ```
 
 ### 커밋 메시지 컨벤션
-모든 커밋 메시지는 아래 헤더 중 하나로 시작한다.
 
-| 헤더 | 사용 시점 |
-|------|-----------|
-| `[AI-Feature]` | 새 기능 구현 |
-| `[AI-Test]` | 테스트 코드 작성/수정 |
-| `[AI-Refactoring]` | 리팩토링 (기능 변경 없음) |
-| `[AI-Docs]` | 문서 작성/수정 (PRD, README 등) |
+| 헤더 | 사용 주체 | 사용 시점 |
+|------|-----------|-----------|
+| `[AI-Feature]` | Agent | 새 기능 구현 |
+| `[AI-Fix]` | Agent | 버그 수정 (리뷰 피드백 반영 포함) |
+| `[AI-Test]` | Agent | 테스트 코드 작성/수정 |
+| `[AI-Refactoring]` | Agent | 리팩토링 (기능 변경 없음) |
+| `[AI-Docs]` | Agent | 문서 작성/수정 (PRD, README 등) |
+| `[AI-Chore]` | Agent | 빌드 설정, 의존성 추가, 프로젝트 초기 구성 |
+| `[USER-Review]` | Agent | 사용자가 WORKLOG 업데이트 후 커밋 요청 시 |
 
 예시:
 ```
 [AI-Feature] 시료 등록 및 조회 기능 구현
+[AI-Fix] 중복 ID 허용되던 버그 수정
 [AI-Test] 시료 등록 중복 ID 검증 테스트 추가
 [AI-Refactoring] SampleController 메서드 분리
+[AI-Docs] PRD.md 작성
+[AI-Chore] Gradle 프로젝트 초기 구성
+[USER-Review] 사용자 리뷰 반영 - 시료 검색 기능 수정 요청
 ```
-
-WORKLOG 커밋은 예외: `docs: update WORKLOG`
 
 ### WORKLOG 작성 형식
 ```markdown
