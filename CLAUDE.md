@@ -141,6 +141,25 @@ WORKLOG 파일 위치: `Document/WORKLOG.md`
 6. 1번으로 반복
 ```
 
+### 커밋 메시지 컨벤션
+모든 커밋 메시지는 아래 헤더 중 하나로 시작한다.
+
+| 헤더 | 사용 시점 |
+|------|-----------|
+| `[AI-Feature]` | 새 기능 구현 |
+| `[AI-Test]` | 테스트 코드 작성/수정 |
+| `[AI-Refactoring]` | 리팩토링 (기능 변경 없음) |
+| `[AI-Docs]` | 문서 작성/수정 (PRD, README 등) |
+
+예시:
+```
+[AI-Feature] 시료 등록 및 조회 기능 구현
+[AI-Test] 시료 등록 중복 ID 검증 테스트 추가
+[AI-Refactoring] SampleController 메서드 분리
+```
+
+WORKLOG 커밋은 예외: `docs: update WORKLOG`
+
 ### WORKLOG 작성 형식
 ```markdown
 ## [YYYY-MM-DD] {작업 제목}
