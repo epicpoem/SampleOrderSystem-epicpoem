@@ -13,6 +13,7 @@ std::vector<std::string> StockService::checkAndCompleteProduction() {
     for (const auto& o : orderRepo_.findAll()) {
         if (o.status != OrderStatus::PRODUCING) continue;
         double elapsedMin = std::difftime(now, o.productionStartTime) / 60.0;
+        if (o.totalProductionTimeMin <= 0.0) continue;
         if (elapsedMin >= o.totalProductionTimeMin) {
             Order done = o;
             done.status = OrderStatus::CONFIRMED;

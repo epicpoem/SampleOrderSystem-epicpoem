@@ -137,6 +137,8 @@
     <ClCompile Include="unit\OrderControllerTest.cpp" />
     <ClCompile Include="unit\JsonOrderRepositoryTest.cpp" />
     <ClCompile Include="unit\ApprovalControllerTest.cpp" />
+    <ClCompile Include="unit\MonitorControllerTest.cpp" />
+    <ClCompile Include="unit\ProductionControllerTest.cpp" />
     <!-- Main project source files (main.cpp 제외) -->
     <ClCompile Include="..\SampleOrderSystem\repository\JsonSampleRepository.cpp" />
     <ClCompile Include="..\SampleOrderSystem\repository\JsonOrderRepository.cpp" />
@@ -147,6 +149,10 @@
     <ClCompile Include="..\SampleOrderSystem\view\ApprovalView.cpp" />
     <ClCompile Include="..\SampleOrderSystem\controller\ApprovalController.cpp" />
     <ClCompile Include="..\SampleOrderSystem\service\StockService.cpp" />
+    <ClCompile Include="..\SampleOrderSystem\view\MonitorView.cpp" />
+    <ClCompile Include="..\SampleOrderSystem\controller\MonitorController.cpp" />
+    <ClCompile Include="..\SampleOrderSystem\view\ProductionView.cpp" />
+    <ClCompile Include="..\SampleOrderSystem\controller\ProductionController.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

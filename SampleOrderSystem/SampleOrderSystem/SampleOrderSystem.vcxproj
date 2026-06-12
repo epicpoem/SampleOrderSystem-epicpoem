@@ -153,6 +153,10 @@
     <ClCompile Include="controller\OrderController.cpp" />
     <ClCompile Include="controller\ApprovalController.cpp" />
     <ClCompile Include="service\StockService.cpp" />
+    <ClCompile Include="view\MonitorView.cpp" />
+    <ClCompile Include="controller\MonitorController.cpp" />
+    <ClCompile Include="view\ProductionView.cpp" />
+    <ClCompile Include="controller\ProductionController.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="model\Sample.h" />
@@ -176,6 +180,12 @@
     <ClInclude Include="controller\OrderController.h" />
     <ClInclude Include="controller\ApprovalController.h" />
     <ClInclude Include="service\StockService.h" />
+    <ClInclude Include="view\IMonitorView.h" />
+    <ClInclude Include="view\MonitorView.h" />
+    <ClInclude Include="controller\MonitorController.h" />
+    <ClInclude Include="view\IProductionView.h" />
+    <ClInclude Include="view\ProductionView.h" />
+    <ClInclude Include="controller\ProductionController.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

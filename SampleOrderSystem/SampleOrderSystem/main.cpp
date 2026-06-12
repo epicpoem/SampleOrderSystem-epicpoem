@@ -3,12 +3,16 @@
 #include "controller/SampleController.h"
 #include "controller/OrderController.h"
 #include "controller/ApprovalController.h"
+#include "controller/MonitorController.h"
+#include "controller/ProductionController.h"
 #include "repository/JsonSampleRepository.h"
 #include "repository/JsonOrderRepository.h"
 #include "service/StockService.h"
 #include "view/SampleView.h"
 #include "view/OrderView.h"
 #include "view/ApprovalView.h"
+#include "view/MonitorView.h"
+#include "view/ProductionView.h"
 #include "util/SystemClock.h"
 
 static void showMainMenu(JsonSampleRepository& sampleRepo,
@@ -59,6 +63,12 @@ int main() {
     ApprovalView       approvalView;
     ApprovalController approvalCtrl(std::cin, approvalView, orderRepo, stockService);
 
+    MonitorView        monitorView;
+    MonitorController  monitorCtrl(std::cin, monitorView, sampleRepo, orderRepo, stockService);
+
+    ProductionView       productionView;
+    ProductionController productionCtrl(std::cin, productionView, sampleRepo, orderRepo, stockService);
+
     while (true) {
         for (const auto& no : stockService.checkAndCompleteProduction())
             std::cout << "[생산완료] " << no << " \xE2\x86\x92 CONFIRMED\n";
@@ -72,8 +82,8 @@ int main() {
         else if (line == "1") sampleCtrl.run();
         else if (line == "2") orderCtrl.run();
         else if (line == "3") approvalCtrl.run();
-        else if (line == "4") std::cout << "  [미구현] 모니터링\n";
-        else if (line == "5") std::cout << "  [미구현] 생산라인 조회\n";
+        else if (line == "4") monitorCtrl.run();
+        else if (line == "5") productionCtrl.run();
         else if (line == "6") std::cout << "  [미구현] 출고 처리\n";
         else                  std::cout << "  유효하지 않은 선택입니다.\n";
     }
