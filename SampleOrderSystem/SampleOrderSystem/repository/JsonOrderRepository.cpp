@@ -32,9 +32,10 @@ std::vector<Order> JsonOrderRepository::loadFromFile() const {
             o.customerName          = item.at("customerName").get<std::string>();
             o.quantity              = item.at("quantity").get<int>();
             o.status                = orderStatusFromString(item.at("status").get<std::string>());
-            o.actualProduction      = item.at("actualProduction").get<int>();
+            o.actualProduction       = item.at("actualProduction").get<int>();
+            o.shortageQty            = item.value("shortageQty", 0);
             o.totalProductionTimeMin = item.at("totalProductionTimeMin").get<double>();
-            o.productionStartTime   = static_cast<std::time_t>(
+            o.productionStartTime    = static_cast<std::time_t>(
                 item.at("productionStartTime").get<long long>());
             orders.push_back(o);
         }
@@ -52,7 +53,8 @@ void JsonOrderRepository::saveToFile(const std::vector<Order>& orders) const {
             {"customerName",          o.customerName},
             {"quantity",              o.quantity},
             {"status",                orderStatusToString(o.status)},
-            {"actualProduction",      o.actualProduction},
+            {"actualProduction",       o.actualProduction},
+            {"shortageQty",            o.shortageQty},
             {"totalProductionTimeMin", o.totalProductionTimeMin},
             {"productionStartTime",   static_cast<long long>(o.productionStartTime)}
         });

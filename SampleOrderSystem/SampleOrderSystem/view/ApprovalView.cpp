@@ -1,26 +1,26 @@
-﻿#include "ApprovalView.h"
+#include "ApprovalView.h"
 #include <iomanip>
 
 ApprovalView::ApprovalView(std::ostream& out) : out_(out) {}
 
 void ApprovalView::showApprovalMenu() {
-    out_ << "\n===========================\n";
-    out_ << "   [3] 주문 승인/거절\n";
-    out_ << "===========================\n";
+    out_ << std::string(70, '=') << "\n";
+    out_ << "  [3] \xEC\xA3\xBC\xEB\xAC\xB8 \xEC\x8A\xB9\xEC\x9D\xB8/\xEA\xB1\xB0\xEC\xA0\x88\n";
+    out_ << std::string(70, '-') << "\n";
 }
 
 void ApprovalView::showNoReservedOrders() {
-    out_ << "  승인 대기 중인 주문이 없습니다.\n";
+    out_ << "[\xEC\x95\x88\xEB\x82\xB4] \xEC\x8A\xB9\xEC\x9D\xB8 \xEB\x8C\x80\xEA\xB8\xB0 \xEC\xA4\x91\xEC\x9D\xB8 \xEC\xA3\xBC\xEB\xAC\xB8\xEC\x9D\xB4 \xEC\x97\x86\xEC\x8A\xB5\xEB\x8B\x88\xEB\x8B\xA4.\n";
 }
 
 void ApprovalView::showReservedOrderList(const std::vector<Order>& orders) {
-    out_ << "\n[승인 대기 주문 목록]\n";
+    out_ << "\n[\xEC\x8A\xB9\xEC\x9D\xB8 \xEB\x8C\x80\xEA\xB8\xB0 \xEC\xA3\xBC\xEB\xAC\xB8 \xEB\xAA\xA9\xEB\xA1\x9D]\n";
     out_ << std::left
          << std::setw(5)  << " No"
-         << std::setw(22) << "  주문번호"
-         << std::setw(10) << " 시료ID"
-         << std::setw(20) << " 고객명"
-         << "수량\n";
+         << std::setw(22) << "  \xEC\xA3\xBC\xEB\xAC\xB8\xEB\xB2\x88\xED\x98\xB8"
+         << std::setw(10) << " \xEC\x8B\x9C\xEB\xA3\x8CID"
+         << std::setw(20) << " \xEA\xB3\xA0\xEA\xB0\x9D\xEB\xAC\xB8"
+         << "\xEC\x88\x98\xEB\x9F\x89\n";
     out_ << std::string(68, '-') << "\n";
     for (int i = 0; i < (int)orders.size(); ++i) {
         const auto& o = orders[i];
@@ -30,54 +30,61 @@ void ApprovalView::showReservedOrderList(const std::vector<Order>& orders) {
              << std::setw(20) << (" " + o.customerName)
              << " " << o.quantity << " ea\n";
     }
-    out_ << " [0] 뒤로\n";
+    out_ << " [0] \xEB\x92\xA4\xEB\xA1\x9C\n";
 }
 
 void ApprovalView::showOrderSelectPrompt() {
-    out_ << "처리할 번호 선택 > ";
+    out_ << "\xEC\xB2\x98\xEB\xA6\xAC\xED\x95\xA0 \xEB\xB2\x88\xED\x98\xB8 \xEC\x84\xa0\xED\x83\x9D > ";
+    out_.flush();
 }
 
 void ApprovalView::showOrderNotFound() {
-    out_ << "[오류] 유효하지 않은 번호입니다.\n";
+    out_ << "[\xEC\x98\xA4\xEB\xA5\x98] \xEC\x9C\xA0\xED\x9A\xA8\xED\x95\x98\xEC\xA7\x80 \xEC\x95\x8A\xEC\x9D\x80 \xEB\xB2\x88\xED\x98\xB8\xEC\x9E\x85\xEB\x8B\x88\xEB\x8B\xA4.\n";
 }
 
 void ApprovalView::showStockSufficient(double physStock, int quantity) {
-    out_ << "\n  물리적 재고: " << std::fixed << std::setprecision(1)
-         << physStock << " ea  (주문 수량: " << quantity << " ea) → 재고 충분\n";
-    out_ << "  승인 시 즉시 CONFIRMED 전환됩니다.\n";
+    out_ << "\n  \xEB\xB3\xB4\xEC\x9C\xA0\xEC\x9E\xAC\xEA\xB3\xA0(\xEC\x8B\xA4\xEC\x8B\x9C\xEA\xB0\x84): " << std::fixed << std::setprecision(1)
+         << physStock << " ea  (\xEC\xA3\xBC\xEB\xAC\xB8 \xEC\x88\x98\xEB\x9F\x89: " << quantity << " ea) \xE2\x86\x92 \xEC\x9E\xAC\xEA\xB3\xA0 \xEC\xB6\x9C\xEB\xB6\x84\n";
+    out_ << "  \xEC\x8A\xB9\xEC\x9D\xB8 \xEC\x8B\x9C \xEC\xA6\x89\xEC\x8B\x9C CONFIRMED \xEC\xA0\x84\xED\x99\x98\xEB\x90\xA9\xEB\x8B\x88\xEB\x8B\xA4.\n";
 }
 
 void ApprovalView::showStockInsufficient(double physStock, int quantity,
                                           double shortage, int actualProd,
                                           double totalProdTimeMin) {
-    out_ << "\n  물리적 재고: " << std::fixed << std::setprecision(1)
-         << physStock << " ea  (주문 수량: " << quantity << " ea) → 재고 부족\n";
-    out_ << "  부족분: " << std::fixed << std::setprecision(1) << shortage
-         << " ea  |  실생산량: " << actualProd
-         << " ea  |  생산시간: " << std::fixed << std::setprecision(0)
+    out_ << "\n  \xEB\xB3\xB4\xEC\x9C\xA0\xEC\x9E\xAC\xEA\xB3\xA0(\xEC\x8B\xA4\xEC\x8B\x9C\xEA\xB0\x84): " << std::fixed << std::setprecision(1)
+         << physStock << " ea  (\xEC\xA3\xBC\xEB\xAC\xB8 \xEC\x88\x98\xEB\x9F\x89: " << quantity << " ea) \xE2\x86\x92 \xEC\x9E\xAC\xEA\xB3\xA0 \xEB\xB6\x80\xEC\xA1\xB1\n";
+    out_ << "  \xEB\xB6\x80\xEC\xA1\xB1\xEB\xB6\x84: " << std::fixed << std::setprecision(1) << shortage
+         << " ea  |\xC2\xA0\xEC\x8B\xA4\xEC\x83\x9D\xEC\x82\xB0\xEB\x9F\x89: " << actualProd
+         << " ea  |\xC2\xA0\xEC\x83\x9D\xEC\x82\xB0\xEC\x8B\x9C\xEA\xB0\x84: " << std::fixed << std::setprecision(0)
          << totalProdTimeMin << " min\n";
-    out_ << "  승인 시 생산라인에 등록되어 PRODUCING 전환됩니다.\n";
+    out_ << "  \xEC\x8A\xB9\xEC\x9D\xB8 \xEC\x8B\x9C \xEC\x83\x9D\xEC\x82\xB0\xEB\x9D\xBC\xEC\x9D\xB8\xEC\x97\x90 \xEB\x93\xB1\xEB\xA1\x9D\xEB\x90\x98\xEC\x96\xB4 PRODUCING \xEC\xA0\x84\xED\x99\x98\xEB\x90\xA9\xEB\x8B\x88\xEB\x8B\xA4.\n";
 }
 
 void ApprovalView::showApprovePrompt() {
-    out_ << "승인하시겠습니까? [Y/N] > ";
+    out_ << "\xEC\x8A\xB9\xEC\x9D\xB8\xED\x95\x98\xEC\x8B\x9C\xEA\xB2\xA0\xEC\x8A\xB5\xEB\x8B\x88\xEA\xB9\x8C? [Y/N] > ";
+    out_.flush();
 }
 
 void ApprovalView::showApprovedAsConfirmed(const Order& order) {
-    out_ << "\n[완료] 주문 " << order.orderNo << " → CONFIRMED 전환되었습니다.\n";
+    out_ << "\n[\xEC\x99\x84\xEB\xA3\x8C] \xEC\xA3\xBC\xEB\xAC\xB8 " << order.orderNo << " \xE2\x86\x92 CONFIRMED \xEC\xA0\x84\xED\x99\x98\xEB\x90\x98\xEC\x97\x88\xEC\x8A\xB5\xEB\x8B\x88\xEB\x8B\xA4.\n";
 }
 
 void ApprovalView::showApprovedAsProducing(const Order& order) {
-    out_ << "\n[완료] 주문 " << order.orderNo << " → PRODUCING 전환되었습니다.\n";
-    out_ << "  실생산량: " << order.actualProduction
-         << " ea  |  총 생산시간: " << std::fixed << std::setprecision(0)
+    out_ << "\n[\xEC\x99\x84\xEB\xA3\x8C] \xEC\xA3\xBC\xEB\xAC\xB8 " << order.orderNo << " \xE2\x86\x92 PRODUCING \xEC\xA0\x84\xED\x99\x98\xEB\x90\x98\xEC\x97\x88\xEC\x8A\xB5\xEB\x8B\x88\xEB\x8B\xA4.\n";
+    out_ << "  \xEC\x8B\xA4\xEC\x83\x9D\xEC\x82\xB0\xEB\x9F\x89: " << order.actualProduction
+         << " ea  |\xC2\xA0\xEC\xB4\x9D \xEC\x83\x9D\xEC\x82\xB0\xEC\x8B\x9C\xEA\xB0\x84: " << std::fixed << std::setprecision(0)
          << order.totalProductionTimeMin << " min\n";
 }
 
 void ApprovalView::showRejected(const Order& order) {
-    out_ << "\n[완료] 주문 " << order.orderNo << " → REJECTED 처리되었습니다.\n";
+    out_ << "\n[\xEC\x99\x84\xEB\xA3\x8C] \xEC\xA3\xBC\xEB\xAC\xB8 " << order.orderNo << " \xE2\x86\x92 REJECTED \xEC\xB2\x98\xEB\xA6\xAC\xEB\x90\x98\xEC\x97\x88\xEC\x8A\xB5\xEB\x8B\x88\xEB\x8B\xA4.\n";
 }
 
 void ApprovalView::showProductionCompleted(const std::string& orderNo) {
-    out_ << "[생산완료] " << orderNo << " 생산 완료 → CONFIRMED 전환\n";
+    out_ << "[\xEC\x83\x9D\xEC\x82\xB0\xEC\x99\x84\xEB\xA3\x8C] " << orderNo << " \xEC\x83\x9D\xEC\x82\xB0 \xEC\x99\x84\xEB\xA3\x8C \xE2\x86\x92 CONFIRMED \xEC\xA0\x84\xED\x99\x98\n";
+}
+
+void ApprovalView::showPressEnterPrompt() {
+    out_ << "\n\xEC\x84\xa0\xED\x83\x9D > ";
+    out_.flush();
 }

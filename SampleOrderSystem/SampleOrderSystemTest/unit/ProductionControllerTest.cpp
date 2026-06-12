@@ -86,7 +86,7 @@ public:
                 (const Order&, const std::string&, double, double), (override));
     MOCK_METHOD(void, showQueueHeader, (int), (override));
     MOCK_METHOD(void, showQueueItem,
-                (int, const Order&, const std::string&, double), (override));
+                (int, const Order&, const std::string&, int, const std::string&), (override));
     MOCK_METHOD(void, showQueueEmpty, (), (override));
     MOCK_METHOD(void, showProductionCompleted, (const std::string&), (override));
 };
@@ -144,7 +144,7 @@ TEST_F(ProductionControllerTest, MultipleOrdersFirstIsCurrentRestIsQueue) {
 
     EXPECT_CALL(view, showCurrentProduction(_, _, _, _)).Times(1);
     EXPECT_CALL(view, showQueueHeader(2)).Times(1);
-    EXPECT_CALL(view, showQueueItem(_, _, _, _)).Times(2);
+    EXPECT_CALL(view, showQueueItem(_, _, _, _, _)).Times(2);
     ctrl.run();
 }
 
@@ -252,7 +252,7 @@ TEST_F(ProductionControllerTest, ThreeOrdersFifoQueueOrdering) {
     // O-B (sampleId=S-002 → "GaN 에피택셀") 이 현재 생산 중
     EXPECT_CALL(view, showCurrentProduction(_, std::string("GaN 에피택셀"), _, _)).Times(1);
     EXPECT_CALL(view, showQueueHeader(2)).Times(1);
-    EXPECT_CALL(view, showQueueItem(_, _, _, _)).Times(2);
+    EXPECT_CALL(view, showQueueItem(_, _, _, _, _)).Times(2);
     ctrl.run();
 }
 

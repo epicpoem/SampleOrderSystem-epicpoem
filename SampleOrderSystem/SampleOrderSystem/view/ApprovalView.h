@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "IApprovalView.h"
 #include <iostream>
 #include <ostream>
@@ -21,6 +21,7 @@ public:
     void showApprovedAsProducing(const Order& order) override;
     void showRejected(const Order& order) override;
     void showProductionCompleted(const std::string& orderNo) override;
+    void showPressEnterPrompt() override;
 
 private:
     std::ostream& out_;

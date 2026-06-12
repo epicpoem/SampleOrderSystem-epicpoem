@@ -1,4 +1,5 @@
-﻿#include "ReleaseController.h"
+#include "ReleaseController.h"
+#include <ctime>
 
 ReleaseController::ReleaseController(std::istream& in, IReleaseView& view,
                                      ISampleRepository& sampleRepo,
@@ -16,10 +17,20 @@ void ReleaseController::run() {
     auto confirmed = orderRepo_.findByStatus(OrderStatus::CONFIRMED);
     if (confirmed.empty()) {
         view_.showNoConfirmedOrders();
+        view_.showPressEnterPrompt();
+        std::string dummy;
+        std::getline(in_, dummy);
         return;
     }
 
-    view_.showConfirmedOrderList(confirmed);
+    // 시료명 목록 구성
+    std::vector<std::string> sampleNames;
+    for (const auto& o : confirmed) {
+        auto opt = sampleRepo_.findById(o.sampleId);
+        sampleNames.push_back(opt.has_value() ? opt->name : o.sampleId);
+    }
+
+    view_.showConfirmedOrderList(confirmed, sampleNames);
     view_.showOrderSelectPrompt();
 
     std::string input;
@@ -38,5 +49,16 @@ void ReleaseController::run() {
     order.status = OrderStatus::RELEASE;
     orderRepo_.update(order);
 
-    view_.showReleaseCompleted(order, stockService_.today());
+    // 처리일시 계산
+    std::time_t now = stockService_.now();
+    std::tm lt{};
+    localtime_s(&lt, &now);
+    char dateBuf[24];
+    std::strftime(dateBuf, sizeof(dateBuf), "%Y-%m-%d %H:%M:%S", &lt);
+
+    view_.showReleaseCompleted(order, std::string(dateBuf));
+
+    view_.showPressEnterPrompt();
+    std::string dummy;
+    std::getline(in_, dummy);
 }

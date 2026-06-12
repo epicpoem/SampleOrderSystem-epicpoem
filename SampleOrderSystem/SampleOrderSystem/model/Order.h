@@ -10,6 +10,7 @@ struct Order {
     int quantity{0};
     OrderStatus status{OrderStatus::RESERVED};
     int actualProduction{0};
+    int shortageQty{0};
     double totalProductionTimeMin{0.0};
     std::time_t productionStartTime{0};
 };

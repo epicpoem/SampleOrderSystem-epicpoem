@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "../model/Order.h"
 #include <string>
 
@@ -10,6 +10,7 @@ public:
     virtual void showCustomerNamePrompt() = 0;
     virtual void showQuantityPrompt() = 0;
     virtual void showOrderConfirmation(const std::string& sampleId,
+                                       const std::string& sampleName,
                                        const std::string& customerName,
                                        int quantity) = 0;
     virtual void showConfirmPrompt() = 0;
@@ -18,4 +19,5 @@ public:
     virtual void showInvalidSampleId() = 0;
     virtual void showInvalidQuantity() = 0;
     virtual void showCancelConfirmPrompt() = 0;
+    virtual void showPressEnterPrompt() {}
 };

@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "IOrderView.h"
 #include <iostream>
 #include <ostream>
@@ -12,6 +12,7 @@ public:
     void showCustomerNamePrompt() override;
     void showQuantityPrompt() override;
     void showOrderConfirmation(const std::string& sampleId,
+                               const std::string& sampleName,
                                const std::string& customerName,
                                int quantity) override;
     void showConfirmPrompt() override;
@@ -20,6 +21,7 @@ public:
     void showInvalidSampleId() override;
     void showInvalidQuantity() override;
     void showCancelConfirmPrompt() override;
+    void showPressEnterPrompt() override;
 
 private:
     std::ostream& out_;

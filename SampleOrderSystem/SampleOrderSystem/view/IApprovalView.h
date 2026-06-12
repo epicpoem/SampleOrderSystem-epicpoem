@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "../model/Order.h"
 #include <vector>
 #include <string>
@@ -20,4 +20,5 @@ public:
     virtual void showApprovedAsProducing(const Order& order) = 0;
     virtual void showRejected(const Order& order) = 0;
     virtual void showProductionCompleted(const std::string& orderNo) = 0;
+    virtual void showPressEnterPrompt() {}
 };

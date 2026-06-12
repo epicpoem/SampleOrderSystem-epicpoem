@@ -1,4 +1,4 @@
-﻿#include "ApprovalController.h"
+#include "ApprovalController.h"
 #include <string>
 #include <cmath>
 
@@ -11,13 +11,17 @@ void ApprovalController::run() {
     for (const auto& orderNo : stockService_.checkAndCompleteProduction())
         view_.showProductionCompleted(orderNo);
 
+    view_.showApprovalMenu();
+
     auto reserved = orderRepo_.findByStatus(OrderStatus::RESERVED);
     if (reserved.empty()) {
         view_.showNoReservedOrders();
+        view_.showPressEnterPrompt();
+        std::string dummy;
+        std::getline(in_, dummy);
         return;
     }
 
-    view_.showApprovalMenu();
     view_.showReservedOrderList(reserved);
     view_.showOrderSelectPrompt();
 
@@ -70,6 +74,7 @@ void ApprovalController::run() {
             Order updated = order;
             updated.status = OrderStatus::PRODUCING;
             updated.actualProduction = actualProd;
+            updated.shortageQty = (int)std::ceil(shortage);
             updated.totalProductionTimeMin = totalProdTime;
             updated.productionStartTime = stockService_.now();
             orderRepo_.update(updated);

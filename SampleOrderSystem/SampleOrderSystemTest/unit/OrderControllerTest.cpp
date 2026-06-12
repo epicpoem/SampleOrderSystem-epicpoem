@@ -89,7 +89,7 @@ public:
     MOCK_METHOD(void, showCustomerNamePrompt, (), (override));
     MOCK_METHOD(void, showQuantityPrompt, (), (override));
     MOCK_METHOD(void, showOrderConfirmation,
-                (const std::string&, const std::string&, int), (override));
+                (const std::string&, const std::string&, const std::string&, int), (override));
     MOCK_METHOD(void, showConfirmPrompt, (), (override));
     MOCK_METHOD(void, showOrderSuccess, (const Order&), (override));
     MOCK_METHOD(void, showOrderCancelled, (), (override));

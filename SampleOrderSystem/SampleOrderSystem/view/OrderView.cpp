@@ -1,56 +1,75 @@
-﻿#include "OrderView.h"
+#include "OrderView.h"
 
 OrderView::OrderView(std::ostream& out) : out_(out) {}
 
 void OrderView::showOrderForm() {
-    out_ << "\n===========================\n";
-    out_ << "     [2] 시료 주문\n";
-    out_ << "===========================\n";
+    out_ << std::string(70, '=') << "\n";
+    out_ << "  [2] \xEC\x8B\x9C\xEB\xA3\x8C \xEC\xA3\xBC\xEB\xAC\xB8\n";
+    out_ << std::string(70, '-') << "\n";
 }
 
 void OrderView::showSampleIdPrompt() {
-    out_ << "시료 ID    > ";
+    out_ << "\xEC\x8B\x9C\xEB\xA3\x8C ID    > ";
+    out_.flush();
 }
 
 void OrderView::showCustomerNamePrompt() {
-    out_ << "고객명     > ";
+    out_ << "\xEA\xB3\xA0\xEA\xB0\x9D\xEB\xAA\x85     > ";
+    out_.flush();
 }
 
 void OrderView::showQuantityPrompt() {
-    out_ << "주문 수량  > ";
+    out_ << "\xEC\xA3\xBC\xEB\xAC\xB8 \xEC\x88\x98\xEB\x9F\x89  > ";
+    out_.flush();
 }
 
 void OrderView::showOrderConfirmation(const std::string& sampleId,
+                                      const std::string& sampleName,
                                       const std::string& customerName,
                                       int quantity) {
-    out_ << "\n[주문 내용 확인]\n";
-    out_ << "  시료 ID : " << sampleId << "\n";
-    out_ << "  고객명  : " << customerName << "\n";
-    out_ << "  수량    : " << quantity << " ea\n";
+    out_ << std::string(70, '-') << "\n";
+    out_ << "\xEC\x9E\x85\xEB\xA0\xa5 \xEB\x82\xB4\xEC\x9A\xA9 \xED\x99\x95\xEC\x9D\xB8\n";
+    out_ << "\xEC\x8B\x9C\xEB\xA3\x8C    " << sampleName << "  (" << sampleId << ")\n";
+    out_ << "\xEA\xB3\xA0\xEA\xB0\x9D    " << customerName << "\n";
+    out_ << "\xEC\x88\x98\xEB\x9F\x89    " << quantity << " ea\n";
+    out_ << "\n";
 }
 
 void OrderView::showConfirmPrompt() {
-    out_ << "예약 접수하시겠습니까? [Y/N] > ";
+    out_ << "[Y] \xEC\x98\x88\xEC\x95\xbd \xEC\xA0\x91\xEC\x88\x98   [N] \xEC\xB7\xA8\xEC\x86\x8C\n";
+    out_ << "\xEC\x84\xa0\xED\x83\x9D > ";
+    out_.flush();
 }
 
 void OrderView::showOrderSuccess(const Order& order) {
-    out_ << "\n[완료] 주문이 접수되었습니다.\n";
-    out_ << "  주문번호 : " << order.orderNo << "\n";
-    out_ << "  상태     : RESERVED\n";
+    out_ << std::string(70, '-') << "\n";
+    out_ << "\xEC\x98\x88\xEC\x95\xbd \xEC\xA0\x91\xEC\x88\x98 \xEC\x99\x84\xEB\xA3\x8C.\n";
+    out_ << "\n";
+    out_ << "\xEC\xA3\xBC\xEB\xAC\xB8\xEB\xB2\x88\xED\x98\xB8    " << order.orderNo << "\n";
+    out_ << "\xED\x98\x84\xEC\x9E\xAC \xEC\x83\x81\xED\x83\x9C   RESERVED\n";
+    out_ << "\n";
+    out_ << "\xE2\x80\xBB \xEC\x9E\xAC\xEA\xB3\xA0 \xED\x99\x95\xEC\x9D\xB8\xEC\x9D\x80 [3] \xEC\x8A\xB9\xEC\x9D\xB8 \xEB\xA9\x94\xEB\x89\xB4\xEC\x97\x90\xEC\x84\x9C \xEC\xA7\x81\xEC\xA0\x91 \xEC\xA7\x84\xED\x96\x89\xED\x95\x98\xEC\x84\xB8\xEC\x9A\x94.\n";
+    out_ << "\n";
 }
 
 void OrderView::showOrderCancelled() {
-    out_ << "[취소] 주문이 취소되었습니다.\n";
+    out_ << "[\xEC\xB7\xA8\xEC\x86\x8C] \xEC\xA3\xBC\xEB\xAC\xB8\xEC\x9D\xB4 \xEC\xB7\xA8\xEC\x86\x8C\xEB\x90\x98\xEC\x97\x88\xEC\x8A\xB5\xEB\x8B\x88\xEB\x8B\xA4.\n";
 }
 
 void OrderView::showInvalidSampleId() {
-    out_ << "[오류] 등록되지 않은 시료 ID입니다. 다시 입력해 주세요.\n";
+    out_ << "[\xEC\x98\xA4\xEB\xA5\x98] \xEB\x93\xB1\xEB\xA1\x9D\xEB\x90\x98\xEC\xA7\x80 \xEC\x95\x8A\xEC\x9D\x80 \xEC\x8B\x9C\xEB\xA3\x8C ID\xEC\x9E\x85\xEB\x8B\x88\xEB\x8B\xA4. \xEB\x8B\xA4\xEC\x8B\x9C \xEC\x9E\x85\xEB\xA0\xa5\xED\x95\xB4 \xEC\xA3\xBC\xEC\x84\xB8\xEC\x9A\x94.\n";
 }
 
 void OrderView::showInvalidQuantity() {
-    out_ << "[오류] 수량은 1 이상이어야 합니다.\n";
+    out_ << "[\xEC\x98\xA4\xEB\xA5\x98] \xEC\x88\x98\xEB\x9F\x89\xEC\x9D\x80 1 \xEC\x9D\xB4\xEC\x83\x81\xEC\x9D\xB4\xEC\x96\xB4\xEC\x95\xBC \xED\x95\xA9\xEB\x8B\x88\xEB\x8B\xA4.\n";
 }
 
 void OrderView::showCancelConfirmPrompt() {
-    out_ << "주문을 취소하시겠습니까? [Y/N] > ";
+    out_ << "\xEC\xA3\xBC\xEB\xAC\xB8\xEC\x9D\x84 \xEC\xB7\xA8\xEC\x86\x8C\xED\x95\x98\xEC\x8B\x9C\xEA\xB2\xA0\xEC\x8A\xB5\xEB\x8B\x88\xEA\xB9\x8C? [Y/N] > ";
+    out_.flush();
+}
+
+void OrderView::showPressEnterPrompt() {
+    out_ << "\xEC\x84\xa0\xED\x83\x9D > ";
+    out_.flush();
 }

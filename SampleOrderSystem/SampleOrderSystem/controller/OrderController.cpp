@@ -1,4 +1,4 @@
-﻿#include "OrderController.h"
+#include "OrderController.h"
 #include <string>
 
 OrderController::OrderController(std::istream& in, IOrderView& view,
@@ -8,7 +8,6 @@ OrderController::OrderController(std::istream& in, IOrderView& view,
     : in_(in), view_(view), sampleRepo_(sampleRepo),
       orderRepo_(orderRepo), clock_(clock) {}
 
-// 빈 입력 시 취소 확인. true → 취소 의사 확인됨
 bool OrderController::confirmCancelOnEmpty() {
     view_.showCancelConfirmPrompt();
     std::string ans;
@@ -56,7 +55,12 @@ void OrderController::run() {
         view_.showInvalidQuantity();
     }
 
-    view_.showOrderConfirmation(sampleId, customerName, qty);
+    // 시료 이름 조회
+    std::string sampleName = sampleId;
+    auto sampleOpt = sampleRepo_.findById(sampleId);
+    if (sampleOpt.has_value()) sampleName = sampleOpt->name;
+
+    view_.showOrderConfirmation(sampleId, sampleName, customerName, qty);
     view_.showConfirmPrompt();
     std::string confirm;
     if (!std::getline(in_, confirm)) return;
@@ -74,4 +78,8 @@ void OrderController::run() {
 
     orderRepo_.add(order);
     view_.showOrderSuccess(order);
+
+    view_.showPressEnterPrompt();
+    std::string dummy;
+    std::getline(in_, dummy);
 }

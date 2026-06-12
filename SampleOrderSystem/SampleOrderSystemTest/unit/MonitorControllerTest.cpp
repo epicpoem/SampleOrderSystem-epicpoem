@@ -75,7 +75,7 @@ static Order makeOrder(const std::string& no, const std::string& sid,
 
 class MockMonitorView : public IMonitorView {
 public:
-    MOCK_METHOD(void, showMenu, (), (override));
+    MOCK_METHOD(void, showMenu, (const std::string&), (override));
     MOCK_METHOD(void, showOrderStats, (int, int, int, int), (override));
     MOCK_METHOD(void, showStockTableHeader, (), (override));
     MOCK_METHOD(void, showStockRow,

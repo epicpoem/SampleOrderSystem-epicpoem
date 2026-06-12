@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "IProductionView.h"
 #include <iostream>
 #include <ostream>
@@ -12,9 +12,10 @@ public:
                                double progressPct, double remainingMin) override;
     void showQueueHeader(int count) override;
     void showQueueItem(int rank, const Order& order, const std::string& sampleName,
-                       double remainingMin) override;
+                       int shortageQty, const std::string& estimatedCompletion) override;
     void showQueueEmpty() override;
     void showProductionCompleted(const std::string& orderNo) override;
+    void showPressEnterPrompt() override;
 private:
     std::ostream& out_;
 };
