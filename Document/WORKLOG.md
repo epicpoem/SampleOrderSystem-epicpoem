@@ -58,4 +58,37 @@
 - PoC 프로젝트 구현 현황 확인함
 
 ### 다음 작업 지시
-- PoC와 SPEC 문서 기반으로 PRD.md 및 Features 작성 
+- PoC와 SPEC 문서 기반으로 PRD.md 및 Features 작성
+
+---
+
+## [2026-06-12] PRD.md 및 FEATURES 문서 작성
+
+### 작업 내용
+- `Document/PRD.md` 작성: 사용자 관점 요구사항 기술 (6개 기능 + 비기능 요구사항 + 상태 전이 요약)
+- `Document/FEATURES/` 작성: 기능별 상세 요구사항 6개 파일
+  - FEATURE-01: 시료 관리 (등록/목록조회/검색)
+  - FEATURE-02: 시료 주문 (주문 접수, 주문번호 채번 정책)
+  - FEATURE-03: 주문 승인/거절 (물리적 재고 계산, 생산량 공식, 결정 시점 고정 정책)
+  - FEATURE-04: 모니터링 (주문량 확인, 재고량 확인, 여유/부족/고갈 기준)
+  - FEATURE-05: 생산라인 조회 (FIFO, 생산완료 감지, FakeClock 구조)
+  - FEATURE-06: 출고 처리 (CONFIRMED 의미, 재고 차감 시점)
+
+### 커밋
+- `c0e37fb` [AI-Docs] Add PRD.md and FEATURES documents
+
+### 리뷰 요청
+- PRD 및 FEATURES 문서 전반 검토 부탁드립니다.
+- 특히 FEATURE-03(주문 승인)의 물리적 재고 계산 정책 및 FEATURE-05(생산라인)의 완료 감지 방식이 스펙 의도와 일치하는지 확인 부탁드립니다.
+- 승인 후 코드 작업을 시작할 예정입니다.
+
+---
+### 리뷰 (by User)
+- 구현 Feature 확인
+
+### 다음 작업 지시
+- PoC 프로젝트 중 MVC 스켈레톤과 Feature 맞지 않는 것 없는지 재확인
+- 코드 작업 시작 (Feature-01)
+- 코드 작업에는 ConsoleMVC PoC 에서 정의한 구조를 참조
+- 코드 작업시 데이터 영속성 (프로그램 재실행 시에도 마지막 상태를 유지) 보유하도록 DataPersistence PoC에서 구현한 CRUD를 참조
+- PoC간 충돌나는게 없도록 구현
