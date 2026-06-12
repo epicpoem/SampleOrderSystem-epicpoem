@@ -6,14 +6,13 @@
 SampleView::SampleView(std::ostream& out) : out_(out) {}
 
 void SampleView::showMenu() {
-    out_ << "\n===========================\n";
-    out_ << "     [1] 시료 관리\n";
-    out_ << "===========================\n";
-    out_ << " [1] 시료 등록\n";
-    out_ << " [2] 시료 목록\n";
-    out_ << " [3] 시료 검색\n";
-    out_ << " [0] 뒤로\n";
+    out_ << std::string(70, '=') << "\n";
+    out_ << "  [1] 시료 관리\n";
+    out_ << std::string(70, '-') << "\n";
+    out_ << "  [1] 시료 등록   [2] 시료 목록   [3] 시료 검색   [0] 뒤로\n";
+    out_ << std::string(70, '-') << "\n";
     out_ << "선택 > ";
+    out_.flush();
 }
 
 void SampleView::showInvalidInput() {
@@ -21,7 +20,8 @@ void SampleView::showInvalidInput() {
 }
 
 void SampleView::showRegisterPrompt() {
-    out_ << "\n[시료 등록]\n";
+    out_ << std::string(70, '-') << "\n";
+    out_ << "[시료 등록]\n";
     out_ << "시료 ID             > ";
 }
 
@@ -58,38 +58,36 @@ void SampleView::showRegisterSuccess(const Sample& sample) {
 }
 
 void SampleView::showSampleList(const std::vector<Sample>& samples) {
-    out_ << "\n[시료 목록]  (총 " << samples.size() << "종)\n";
+    out_ << std::string(70, '-') << "\n";
+    out_ << "등록 시료 목록  (총 " << samples.size() << "종)\n";
     if (samples.empty()) {
         out_ << "  등록된 시료가 없습니다.\n";
         return;
     }
-    out_ << std::left
-         << std::setw(8)  << "ID"
-         << std::setw(24) << "시료명"
-         << std::setw(18) << "평균 생산시간"
-         << std::setw(8)  << "수율"
+    out_ << "\n" << std::left
+         << std::setw(10) << "ID"
+         << std::setw(32) << "시료명"
+         << std::setw(26) << "평균 생산시간"
+         << std::setw(10) << "수율"
          << "현재 재고\n";
-    out_ << std::string(68, '-') << "\n";
+    out_ << std::string(70, '-') << "\n";
     for (const auto& s : samples) {
         std::ostringstream timeStr;
-        timeStr << std::fixed << std::setprecision(4) << s.avgProductionTime << " min/ea";
-        std::ostringstream stockStr;
-        stockStr << s.stock << " ea";
-        out_ << std::setw(8)  << s.id
-             << std::setw(24) << s.name
+        timeStr << std::fixed << std::setprecision(1) << s.avgProductionTime << " min/ea";
+        out_ << std::setw(10) << s.id
+             << std::setw(32) << s.name
              << std::setw(21) << timeStr.str()
-             << std::setw(8)  << s.yield
-             << stockStr.str() << "\n";
+             << std::setw(10) << s.yield
+             << s.stock << " ea\n";
     }
 }
 
 void SampleView::showSearchMenu() {
-    out_ << "\n[시료 검색] 검색 기준을 선택하세요.\n";
-    out_ << " [1] ID로 검색\n";
-    out_ << " [2] 이름으로 검색\n";
-    out_ << " [3] 수율로 검색 (입력값 이상)\n";
-    out_ << " [0] 뒤로\n";
+    out_ << std::string(70, '-') << "\n";
+    out_ << "[시료 검색] 검색 기준을 선택하세요.\n";
+    out_ << "  [1] ID로 검색   [2] 이름으로 검색   [3] 수율로 검색 (이상)   [0] 뒤로\n";
     out_ << "선택 > ";
+    out_.flush();
 }
 
 void SampleView::showSearchPrompt() {
@@ -97,7 +95,7 @@ void SampleView::showSearchPrompt() {
 }
 
 void SampleView::showSearchResult(const std::vector<Sample>& samples) {
-    out_ << "\n[검색 결과]  " << samples.size() << "건\n";
+    out_ << "[검색 결과]  " << samples.size() << "건\n";
     showSampleList(samples);
 }
 

@@ -34,9 +34,8 @@ void MonitorView::showStockTableHeader() {
 void MonitorView::showStockRow(const Sample& sample, double physStock,
                                int totalOrderedQty,
                                const std::string& statusLabel) {
-    // physStock string (2 decimal places)
     std::ostringstream physStr;
-    physStr << std::fixed << std::setprecision(2) << physStock << " ea";
+    physStr << (long long)physStock << " ea";
 
     std::string orderStr = std::to_string(totalOrderedQty) + " ea";
 
