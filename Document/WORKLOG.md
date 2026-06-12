@@ -355,3 +355,28 @@
 
 ### 다음 작업 지시
 - 생산시간 소숫점 단위 입력 가능하도록 리팩토링 (0.05min/ea 등)
+
+## [2026-06-12] 생산시간 소수점 입력 지원 (리뷰 반영)
+
+### 작업 내용
+- 코드 확인: `avgProductionTime`은 이미 `double`, 입력도 `stod()` 사용 → 소수점 입력 자체는 원래 동작
+- `SampleView.showTimePrompt()`: 프롬프트에 "(소수점 입력 가능)" 힌트 추가
+- `SampleView.showRegisterSuccess()` / `showSampleList()`: avgProductionTime 표시에 `std::fixed << std::setprecision(4)` 적용 → 0.0500 min/ea 형식으로 명확하게 표시
+- `SampleControllerTest`: `RegisterSampleWithSmallDecimalAvgTimeSucceeds` (0.05), `RegisterSampleWithTinyDecimalAvgTimeSucceeds` (0.001) TC 추가
+- `ApprovalControllerTest`: `SmallDecimalAvgTimeProductionTimeIsCorrect` (생산량 계산), `SmallDecimalAvgTimeCompletesQuickly` (0.5min 생산 완료 31초 경과) TC 추가
+- 91/91 테스트 전부 통과
+
+### 커밋
+- `628718b` [AI-Fix] 생산시간 소수점 입력 지원 명시 (프롬프트 힌트, 표시 형식 개선) + [AI-Test] 소수점 TC 추가
+
+### 리뷰 요청
+- 프롬프트에 "(소수점 입력 가능)" 힌트 추가 및 `0.0500 min/ea` 형식 표시 확인 요청
+- 0.05, 0.001 등 소수점 avgTime 등록/생산계산/완료감지 시나리오 TC 확인 요청
+- 이상 없으면 Feature-04(모니터링) 구현 지시 부탁드립니다.
+
+---
+### 리뷰 (by User)
+- (사용자 작성)
+
+### 다음 작업 지시
+- (사용자 작성)
