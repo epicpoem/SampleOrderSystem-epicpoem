@@ -304,3 +304,69 @@ TEST_F(OrderControllerTest, EmptyQuantityDeclineCancelThenSucceeds) {
 
     EXPECT_EQ(orderRepo.findAll()[0].quantity, 50);
 }
+
+// ── 추가 Negative / Edge-case TCs ────────────────────────────────────────
+
+// 수량 최솟값 1 → 성공 (경계값)
+TEST_F(OrderControllerTest, QuantityExactlyOneSucceeds) {
+    NiceMock<MockOrderView> view;
+    std::istringstream in("S-001\n고객A\n1\nY\n");
+    OrderController ctrl(in, view, sampleRepo, orderRepo, clock);
+
+    EXPECT_CALL(view, showOrderSuccess(_)).Times(1);
+    ctrl.run();
+
+    EXPECT_EQ(orderRepo.findAll()[0].quantity, 1);
+}
+
+// 잘못된 시료 ID 복수 입력 후 유효 ID → 성공
+TEST_F(OrderControllerTest, MultipleInvalidSampleIdsBeforeValidSucceeds) {
+    NiceMock<MockOrderView> view;
+    std::istringstream in("X-001\nX-002\nS-001\n고객A\n50\nY\n");
+    OrderController ctrl(in, view, sampleRepo, orderRepo, clock);
+
+    EXPECT_CALL(view, showInvalidSampleId()).Times(2);
+    EXPECT_CALL(view, showOrderSuccess(_)).Times(1);
+    ctrl.run();
+
+    EXPECT_EQ(orderRepo.findAll().size(), 1u);
+}
+
+// 잘못된 수량 복수 입력 (0, 음수, 비숫자) 후 유효 수량 → 성공
+TEST_F(OrderControllerTest, MultipleInvalidQuantitiesBeforeValidSucceeds) {
+    NiceMock<MockOrderView> view;
+    std::istringstream in("S-001\n고객A\n0\n-5\nabc\n100\nY\n");
+    OrderController ctrl(in, view, sampleRepo, orderRepo, clock);
+
+    EXPECT_CALL(view, showInvalidQuantity()).Times(3);
+    EXPECT_CALL(view, showOrderSuccess(_)).Times(1);
+    ctrl.run();
+
+    EXPECT_EQ(orderRepo.findAll()[0].quantity, 100);
+}
+
+// 취소 확인에 Y/N 이외 문자 입력 → 취소 안 됨 (N과 동일 처리)
+TEST_F(OrderControllerTest, CancelConfirmWithNonYNInputTreatedAsNo) {
+    NiceMock<MockOrderView> view;
+    // 빈 ID → 취소 확인에 "X" 입력 → 취소 안 됨 → 재입력 → 성공
+    std::istringstream in("\nX\nS-001\n고객A\n50\nY\n");
+    OrderController ctrl(in, view, sampleRepo, orderRepo, clock);
+
+    EXPECT_CALL(view, showCancelConfirmPrompt()).Times(1);
+    EXPECT_CALL(view, showOrderSuccess(_)).Times(1);
+    ctrl.run();
+
+    EXPECT_EQ(orderRepo.findAll().size(), 1u);
+}
+
+// 최종 확인에 공백 입력 → 취소로 처리
+TEST_F(OrderControllerTest, FinalConfirmWithEmptyInputCancels) {
+    NiceMock<MockOrderView> view;
+    std::istringstream in("S-001\n고객A\n50\n\n");
+    OrderController ctrl(in, view, sampleRepo, orderRepo, clock);
+
+    EXPECT_CALL(view, showOrderCancelled()).Times(1);
+    ctrl.run();
+
+    EXPECT_TRUE(orderRepo.findAll().empty());
+}

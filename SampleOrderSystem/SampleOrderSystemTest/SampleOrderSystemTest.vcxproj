@@ -135,6 +135,7 @@
     <ClCompile Include="unit\SampleControllerTest.cpp" />
     <ClCompile Include="unit\JsonSampleRepositoryTest.cpp" />
     <ClCompile Include="unit\OrderControllerTest.cpp" />
+    <ClCompile Include="unit\JsonOrderRepositoryTest.cpp" />
     <!-- Main project source files (main.cpp 제외) -->
     <ClCompile Include="..\SampleOrderSystem\repository\JsonSampleRepository.cpp" />
     <ClCompile Include="..\SampleOrderSystem\repository\JsonOrderRepository.cpp" />
