@@ -127,6 +127,43 @@ data/           # JSON 저장 파일
 
 ---
 
+## 개발 워크플로우 (WORKLOG 기반)
+
+모든 작업은 아래 사이클을 반드시 따른다.
+WORKLOG 파일 위치: `Document/WORKLOG.md`
+
+```
+1. 작업 시작 전  → Document/WORKLOG.md 열어 최신 리뷰/지시사항 확인
+2. 작업 및 커밋  → 기능 단위로 커밋
+3. WORKLOG 업데이트 → 작업 내용 요약, 커밋 해시, 리뷰 요청사항 기록
+4. WORKLOG 커밋  → "docs: update WORKLOG" 메시지로 커밋 및 푸시
+5. 사용자 리뷰   → 사용자가 WORKLOG에 피드백/다음 지시 작성 후 커밋
+6. 1번으로 반복
+```
+
+### WORKLOG 작성 형식
+```markdown
+## [YYYY-MM-DD] {작업 제목}
+
+### 작업 내용
+- 구현한 내용 요약
+
+### 커밋
+- `{hash}` {커밋 메시지}
+
+### 리뷰 요청
+- 확인 또는 판단이 필요한 사항
+
+---
+### 리뷰 (by User)
+- (사용자 작성)
+
+### 다음 작업 지시
+- (사용자 작성)
+```
+
+---
+
 ## 공통 제약
 - 모델: **Sonnet / Effort: Medium** 만 허용 (Opus 사용 금지)
 - Repository: Public 유지
