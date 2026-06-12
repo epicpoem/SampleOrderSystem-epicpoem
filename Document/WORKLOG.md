@@ -326,3 +326,31 @@
 
 ### 다음 작업 지시
 - 리뷰 의견 반영하여 구현 지시
+
+## [2026-06-12] 물리적 재고 실시간 반영 수정 (리뷰 반영)
+
+### 작업 내용
+- `StockService` 신규 생성 (`service/StockService.h/.cpp`):
+  - `checkAndCompleteProduction()`: 생산 완료 감지 + 주문 상태 + 시료 stock 업데이트, 완료된 주문번호 목록 반환
+  - `calcPhysicalStock(sample)`: `stock + Σ(actualProd * min(1.0, elapsed/total))`
+  - `findSampleById()`, `now()` 위임 메서드
+- `ApprovalController` 리팩토링: `StockService` 주입 방식으로 변경 (sampleRepo/clock 직접 의존 제거)
+- `main.cpp` 메인 루프: 메뉴 출력 직전마다 `stockService.checkAndCompleteProduction()` 호출
+- `showMainMenu`: `sample.stock` 단순 합산 → `stockService.calcPhysicalStock(s)` 합산으로 변경 (물리적 재고 실시간 표시)
+- 87/87 테스트 전부 통과
+
+### 커밋
+- `a1d0836` [AI-Fix] StockService 추출 - 물리적 재고 실시간 반영 (메뉴 진입마다 갱신)
+
+### 리뷰 요청
+- 메인 화면 `총 재고` 수치가 PRODUCING 주문의 진행분을 반영하여 실시간으로 변하는 동작 확인 요청
+- 메뉴 진입마다 `checkAndCompleteProduction` 호출 → 생산 완료 시 알림 출력 동작 확인 요청
+- ApprovalController에서도 동일 StockService를 사용하므로 이중 호출 시 멱등성 보장 확인 요청
+- 이상 없으면 Feature-04(모니터링) 구현 지시 부탁드립니다.
+
+---
+### 리뷰 (by User)
+- (사용자 작성)
+
+### 다음 작업 지시
+- (사용자 작성)
