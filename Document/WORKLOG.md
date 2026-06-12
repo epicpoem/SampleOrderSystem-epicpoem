@@ -645,3 +645,35 @@
 - [6] 출고 처리: CONFIRMED 목록에 시료명 표시, 출고 완료 화면, Enter 대기 후 복귀 확인 요청
 - 추가 보완 필요한 화면이 있으면 지시 부탁드립니다.
 
+---
+### 리뷰 (by User)
+- 시료 관리에서 시료 추가에 들어갔을때, 빈 엔터치면 시료 추가를 취소하던 루틴이 사라졌어. 해당 루틴 추가해줘.
+
+### 다음 작업 지시
+- 시료 등록 중 빈 입력 취소 확인 기능 복구
+
+---
+
+## [2026-06-12] 시료 등록 중 빈 입력 취소 확인 기능 복구
+
+### 작업 내용
+- `ISampleView`: `showCancelConfirmPrompt()` / `showRegisterCancelled()` non-pure 메서드 추가
+- `SampleView`: 취소 확인 프롬프트("시료 등록을 취소하시겠습니까? [Y/N] >") 및 취소 완료 메시지 구현
+- `SampleController::handleRegister()`: 각 입력 단계(ID / 이름 / 평균생산시간 / 수율)에서 빈 입력 시
+  - "시료 등록을 취소하시겠습니까? [Y/N]" 출력 → Y/y: 등록 취소 후 복귀, 기타: 재입력
+- 수율 범위 오류 처리: 기존 `return` 방식 → 루프 방식으로 변경 (재입력 가능, 다른 필드와 일관성)
+- `SampleControllerTest`: 기존 수율 오류 TC 입력 수정(루프 대응) + 취소 확인 TC 6개 추가
+  - `EmptyIdThenConfirmYCancelsRegister`, `EmptyIdDeclineCancelThenSucceeds`
+  - `EmptyNameThenConfirmYCancelsRegister`, `EmptyAvgTimeThenConfirmYCancelsRegister`
+  - `EmptyYieldThenConfirmYCancelsRegister`, `EmptyYieldDeclineCancelThenSucceeds`
+
+### 커밋
+- `6801828` [AI-Fix] 시료 등록 중 빈 입력 취소 확인 기능 추가 (136/136 PASS)
+
+### 리뷰 요청
+- 136/136 테스트 전부 통과 확인되었습니다.
+- [1] 시료 관리 → [1] 시료 등록: 각 입력 단계에서 빈 엔터 입력 시 취소 확인 문구 동작 확인 요청
+  - Y 입력 → "[취소] 시료 등록이 취소되었습니다." 출력 후 시료 관리 메뉴로 복귀
+  - N/기타 입력 → 해당 필드 재입력 프롬프트
+- 추가 보완 사항 있으면 지시 부탁드립니다.
+
