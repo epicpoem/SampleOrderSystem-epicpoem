@@ -234,3 +234,34 @@
 
 ### 다음 작업 지시
 - 시료 주문중 취소하는 방법 필요 (빈 str 입력시 시료 주문을 취소하겠습니까 출력 등)
+
+---
+
+## [2026-06-12] 시료 주문 빈 입력 취소 기능 추가
+
+### 작업 내용
+- `IOrderView`에 `showCancelConfirmPrompt()` 메서드 추가
+- `OrderController::run()` 수정: 시료 ID / 고객명 / 수량 각 입력 단계에서 빈 문자열 입력 시 "주문을 취소하시겠습니까? [Y/N]" 출력
+  - Y/y → 주문 취소 후 메인 메뉴로 복귀
+  - N/n → 해당 항목 재입력
+- 기존 `EmptySampleIdRepromptsUntilValid` TC를 새 동작에 맞게 수정
+- 빈 입력 취소 관련 TC 4개 신규 추가
+  - `EmptySampleIdThenConfirmYCancelsOrder`
+  - `EmptyCustomerNameThenConfirmYCancelsOrder`
+  - `EmptyQuantityThenConfirmYCancelsOrder`
+  - `EmptyQuantityDeclineCancelThenSucceeds`
+
+### 커밋
+- `7c5fe61` [AI-Fix] 시료 주문 중 빈 입력 시 취소 확인 기능 추가 (53/53 PASS)
+
+### 리뷰 요청
+- 빌드 및 테스트 53/53 통과 확인되었습니다.
+- Visual Studio에서 실행하여 시료 주문 중 빈 입력 시 취소 확인 문구 동작 확인 부탁드립니다.
+- 이상 없으면 Feature-03(주문 승인/거절) 진행 지시 부탁드립니다.
+
+---
+### 리뷰 (by User)
+- 휘소 동작 확인
+
+### 다음 작업 지시
+- NegativeTC 추가 및 테스트
