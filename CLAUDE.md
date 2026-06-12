@@ -10,6 +10,44 @@ Agentic Engineering을 도입하여 고품질 코드를 개발한다.
 
 ---
 
+## 참조 PoC 프로젝트 (완료됨)
+
+아래 4개의 PoC 프로젝트가 **모두 완료**되었다.
+SampleOrderSystem 개발 시작 전에 각 PoC 코드를 반드시 읽고, 검증된 패턴을 재사용한다.
+코드를 중복 작성하지 말고 PoC에서 확립된 설계를 이어받아 구현한다.
+
+| PoC 프로젝트 | 로컬 경로 | GitHub |
+|---|---|---|
+| ConsoleMVC | [`../ConsoleMVC/`](../ConsoleMVC/) | https://github.com/epicpoem/ConsoleMVC-epicpoem |
+| DataPersistence | [`../DataPersistence/`](../DataPersistence/) | https://github.com/epicpoem/DataPersistence-epicpoem |
+| DataMonitor | [`../DataMonitor/`](../DataMonitor/) | https://github.com/epicpoem/DataMonitor-epicpoem |
+| DummyDataGenerator | [`../DummyDataGenerator/`](../DummyDataGenerator/) | https://github.com/epicpoem/DummyDataGenerator-epicpoem |
+
+### PoC별 재사용 대상
+
+#### ConsoleMVC (`../ConsoleMVC/`)
+- MVC 3계층 패키지 구조 (model/, controller/, view/)
+- `ISampleRepository` / `IOrderRepository` 인터페이스 설계
+- `IClock` / `SystemClock` / `FakeClock` 시간 추상화 패턴
+- 6개 Controller 구현 패턴 (SampleController, OrderController 등)
+- 콘솔 한글 인코딩 처리 (`SetConsoleOutputCP(CP_UTF8)`)
+- MSVC UTF-8 소스 빌드 옵션 (`/utf-8`)
+
+#### DataPersistence (`../DataPersistence/`)
+- JSON 파일 저장/불러오기 구현체 (`JsonSampleRepository`)
+- Repository 인터페이스와 JSON 구현체 분리 패턴
+- ID 중복 방지 처리 방식
+
+#### DataMonitor (`../DataMonitor/`)
+- 전체 데이터 콘솔 조회 Tool 구조
+- 읽기 전용 Repository 활용 패턴
+
+#### DummyDataGenerator (`../DummyDataGenerator/`)
+- SampleOrderSystem JSON 스키마 및 초기 데이터 포맷
+- 테스트용 Dummy 데이터 생성 Tool (개발/테스트 시 활용)
+
+---
+
 ## 시스템 개요
 
 - 플랫폼: 콘솔 기반 CLI
