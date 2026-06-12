@@ -134,3 +134,31 @@
 
 ### 다음 작업 지시
 - 직접 MSVC를 사용해서 빌드하여 원인 파악 수정
+
+---
+
+## [2026-06-12] Feature-01 빌드 오류 수정
+
+### 작업 내용
+- 빌드 오류 원인: `SampleView.h`에서 기본 인자 `std::cout` 참조 시 `<iostream>` 미포함
+- `SampleView.h`에 `#include <iostream>` 추가하여 해결
+- 메인 프로젝트 빌드 성공 확인 (`SampleOrderSystem.exe`)
+- 테스트 프로젝트 빌드 성공 확인 (`SampleOrderSystemTest.exe`)
+- 27개 테스트 전부 PASSED (SampleControllerTest 14개 + JsonSampleRepositoryTest 13개)
+
+### 커밋
+- `4cb6fa1` [AI-Fix] SampleView.h에 <iostream> 누락으로 인한 빌드 오류 수정
+
+### 리뷰 요청
+- 빌드 및 테스트 27/27 통과 확인되었습니다.
+- Visual Studio에서 직접 실행하여 Feature-01 동작(시료 등록/조회/검색) 확인 부탁드립니다.
+- 이상 없으면 Feature-02(시료 주문) 진행 지시 부탁드립니다.
+
+---
+### 리뷰 (by User)
+- 정상 빌드 및 출력 정상 확인
+- Feature1 기능 구현 확인
+- binary 종료 후 재실행시 Feature1 (시료) 영속성 확인
+
+### 다음 작업 지시
+- Negative TC 구현 및 테스트
