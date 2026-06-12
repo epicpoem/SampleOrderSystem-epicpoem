@@ -191,7 +191,6 @@
     <ClInclude Include="view\IReleaseView.h" />
     <ClInclude Include="view\ReleaseView.h" />
     <ClInclude Include="controller\ReleaseController.h" />
-    <ClInclude Include="controller\ProductionController.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
