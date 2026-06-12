@@ -206,6 +206,56 @@ TEST_F(ProductionControllerTest, ProductionCompletedOnMenuEntry) {
     ctrl.run();
 }
 
+// ── Negative: 경계값 / 오류 / 순서 보장 ────────────────────────────────────
+
+TEST_F(ProductionControllerTest, ProgressNearHundredPercent) {
+    // elapsed=599s, totalProdTime=10min(600s) → 미완료, 진행률 ≈ 99.83%
+    orderRepo.add(makeProducing("O-1", "S-001", 100, 100, 10.0, 0));
+    clock.setNow(599);  // 599s < 600s → checkAndCompleteProduction 미발동
+
+    NiceMock<MockProductionView> view;
+    std::istringstream in("");
+    ProductionController ctrl(in, view, sampleRepo, orderRepo, stockService);
+
+    EXPECT_CALL(view, showProductionCompleted(_)).Times(0);
+    EXPECT_CALL(view, showCurrentProduction(_, _, DoubleNear(99.83, 0.1),
+                                             DoubleNear(0.017, 0.01))).Times(1);
+    ctrl.run();
+}
+
+TEST_F(ProductionControllerTest, UnknownSampleIdFallsBackToId) {
+    // sampleRepo에 없는 sampleId → 이름 대신 ID 자체를 표시
+    orderRepo.add(makeProducing("O-1", "S-UNKNOWN", 100, 100, 100.0, 0));
+    clock.setNow(0);
+
+    NiceMock<MockProductionView> view;
+    std::istringstream in("");
+    ProductionController ctrl(in, view, sampleRepo, orderRepo, stockService);
+
+    EXPECT_CALL(view, showCurrentProduction(_, std::string("S-UNKNOWN"), _, _)).Times(1);
+    ctrl.run();
+}
+
+TEST_F(ProductionControllerTest, ThreeOrdersFifoQueueOrdering) {
+    // startTime 이 비정렬 순서로 입력되어도 FIFO 정렬 후 최소 startTime 이 현재 생산 중
+    // O-A startTime=30, O-B startTime=10, O-C startTime=20
+    // FIFO 정렬 → O-B(10) → 현재, O-C(20)/O-A(30) → 큐
+    orderRepo.add(makeProducing("O-A", "S-001", 100, 100, 100.0, 30));
+    orderRepo.add(makeProducing("O-B", "S-002", 100, 100, 100.0, 10));
+    orderRepo.add(makeProducing("O-C", "S-001", 100, 100, 100.0, 20));
+    clock.setNow(0);
+
+    NiceMock<MockProductionView> view;
+    std::istringstream in("");
+    ProductionController ctrl(in, view, sampleRepo, orderRepo, stockService);
+
+    // O-B (sampleId=S-002 → "GaN 에피택셀") 이 현재 생산 중
+    EXPECT_CALL(view, showCurrentProduction(_, std::string("GaN 에피택셀"), _, _)).Times(1);
+    EXPECT_CALL(view, showQueueHeader(2)).Times(1);
+    EXPECT_CALL(view, showQueueItem(_, _, _, _)).Times(2);
+    ctrl.run();
+}
+
 TEST_F(ProductionControllerTest, QueueEmpty_WhenOnlyOneProducing) {
     orderRepo.add(makeProducing("O-1", "S-001", 100, 100, 100.0, 0));
     clock.setNow(0);

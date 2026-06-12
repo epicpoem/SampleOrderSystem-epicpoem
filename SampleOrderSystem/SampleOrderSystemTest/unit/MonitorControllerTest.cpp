@@ -193,6 +193,35 @@ TEST_F(MonitorControllerTest, StockStatus_ReservedOrderExcluded) {
     ctrl.run();
 }
 
+// ── Negative: 재고 상태 경계값 / 제외 조건 ─────────────────────────────────
+
+TEST_F(MonitorControllerTest, ReleaseOrderExcludedFromStockCalculation) {
+    // RELEASE 주문은 재고 상태 계산에서 제외 → totalQty=0 → "여유"
+    orderRepo.add(makeOrder("O-1", "S-001", 200, OrderStatus::RELEASE));
+
+    NiceMock<MockMonitorView> view;
+    std::istringstream in("");
+    MonitorController ctrl(in, view, sampleRepo, orderRepo, stockService);
+
+    EXPECT_CALL(view, showStockRow(_, 0, std::string("여유"))).Times(1);
+    ctrl.run();
+}
+
+TEST_F(MonitorControllerTest, StockBoundaryOneLessThanOrdered) {
+    // 경계값: stock=99, CONFIRMED qty=100 → stock < totalQty → "부족"
+    orderRepo.add(makeOrder("O-1", "S-001", 1, OrderStatus::CONFIRMED));
+    // S-001 stock=100 이므로 stock=100, totalQty=1 → "여유" 가 됨
+    // 따라서 부족 경계 테스트를 위해 qty=101 사용 (stock=100 < 101)
+    orderRepo.add(makeOrder("O-2", "S-001", 100, OrderStatus::CONFIRMED));  // totalQty=101
+
+    NiceMock<MockMonitorView> view;
+    std::istringstream in("");
+    MonitorController ctrl(in, view, sampleRepo, orderRepo, stockService);
+
+    EXPECT_CALL(view, showStockRow(_, 101, std::string("부족"))).Times(1);
+    ctrl.run();
+}
+
 TEST_F(MonitorControllerTest, NoSamplesShowsNoSamplesMessage) {
     MonSampleRepo emptySampleRepo;
     StockService  emptyService{emptySampleRepo, orderRepo, clock};

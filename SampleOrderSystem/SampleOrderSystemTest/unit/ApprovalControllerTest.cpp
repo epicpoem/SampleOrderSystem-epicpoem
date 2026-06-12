@@ -415,6 +415,45 @@ TEST_F(ApprovalControllerTest, SmallDecimalAvgTimeProductionTimeIsCorrect) {
     EXPECT_DOUBLE_EQ(updated->totalProductionTimeMin, 0.05 * 136);
 }
 
+// ── Negative: 경계값 / 오류 입력 / 미등록 시료 ───────────────────────────────
+
+TEST_F(ApprovalControllerTest, StockOneShortGoesToProducing) {
+    // 경계값: physStock=100, qty=101 → stock < qty 로 PRODUCING 전환
+    orderRepo.add(makeReserved("ORD-20260612-0001", "S-001", "고객A", 101));
+    NiceMock<MockApprovalView> view;
+    std::istringstream in("1\nY\n");
+    ApprovalController ctrl(in, view, orderRepo, stockService);
+
+    EXPECT_CALL(view, showStockInsufficient(_, _, _, _, _)).Times(1);
+    EXPECT_CALL(view, showApprovedAsProducing(_)).Times(1);
+    ctrl.run();
+
+    EXPECT_EQ(orderRepo.findByNo("ORD-20260612-0001")->status, OrderStatus::PRODUCING);
+}
+
+TEST_F(ApprovalControllerTest, NegativeIndexShowsOrderNotFound) {
+    // 음수 번호 입력 → showOrderNotFound
+    orderRepo.add(makeReserved("ORD-20260612-0001", "S-001", "고객A", 50));
+    NiceMock<MockApprovalView> view;
+    std::istringstream in("-1\n");
+    ApprovalController ctrl(in, view, orderRepo, stockService);
+
+    EXPECT_CALL(view, showOrderNotFound()).Times(1);
+    ctrl.run();
+}
+
+TEST_F(ApprovalControllerTest, SampleNotFoundForOrderShowsNotFound) {
+    // 주문이 참조하는 시료가 sampleRepo에 없으면 showOrderNotFound
+    Order o = makeReserved("ORD-20260612-0001", "S-999", "고객A", 50);
+    orderRepo.add(o);
+    NiceMock<MockApprovalView> view;
+    std::istringstream in("1\n");
+    ApprovalController ctrl(in, view, orderRepo, stockService);
+
+    EXPECT_CALL(view, showOrderNotFound()).Times(1);
+    ctrl.run();
+}
+
 TEST_F(ApprovalControllerTest, SmallDecimalAvgTimeCompletesQuickly) {
     // avgTime=0.05 min/ea, 생산 완료: elapsed=20초 >= totalProdTime=0.05*10=0.5min=30초
     // 0.05min = 3초, actualProd=10 → totalProdTimeMin=0.5min → 30초
