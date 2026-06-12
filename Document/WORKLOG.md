@@ -419,3 +419,39 @@
 ### 다음 작업 지시
 - Feature 3,4,5 Negative TC 추가 후 테스트
 - 테스트 성공시 Feature 6 구현 지시
+
+## [2026-06-12] Feature-03/04/05 Negative TC 추가 + Feature-06 출고 처리 구현
+
+### 작업 내용
+**Negative TC (Feature-03/04/05)**
+- ApprovalControllerTest 3개 추가: `StockOneShortGoesToProducing`(경계값), `NegativeIndexShowsOrderNotFound`, `SampleNotFoundForOrderShowsNotFound`
+- MonitorControllerTest 2개 추가: `ReleaseOrderExcludedFromStockCalculation`, `StockBoundaryOneLessThanOrdered`
+- ProductionControllerTest 3개 추가: `ProgressNearHundredPercent`(99.83% 미완료), `UnknownSampleIdFallsBackToId`, `ThreeOrdersFifoQueueOrdering`
+- 116/116 전부 통과 확인
+
+**Feature-06 출고 처리 구현**
+- `IReleaseView.h` / `ReleaseView.h/.cpp` / `ReleaseController.h/.cpp` 신규 생성
+- `StockService.today()` 추가 (처리 일시 표시용)
+- CONFIRMED 주문 목록 표시 → 선택 → RELEASE 전환 + 재고 차감 (decreaseStock)
+- 메뉴 진입 시 생산 완료 자동 감지 (checkAndCompleteProduction)
+- `main.cpp`: 메뉴 [6] 출고 처리 연결
+- `ReleaseControllerTest.cpp` 9개 테스트: 기본 흐름 4개 + Negative 5개
+- **125/125 전부 통과**
+
+### 커밋
+- `d6dc0a0` [AI-Test] Feature-03/04/05 Negative TC 추가 (116/116 통과)
+- `4321d51` [AI-Feature] Feature-06 출고 처리 구현
+- `85ec029` [AI-Test] Feature-06 ReleaseController 테스트 추가 (125/125 통과)
+
+### 리뷰 요청
+- Feature-03/04/05 Negative TC 추가 내용 확인 요청
+- [6] 출고 처리 메뉴: CONFIRMED 주문 선택 → RELEASE 전환 및 재고 차감 동작 확인 요청
+- PRODUCING → CONFIRMED 자동 전환 후 즉시 출고 가능한 동작 확인 요청
+- 전체 6개 메뉴 + 종료 기능 최종 완료. 추가 리팩토링/보완 사항 지시 부탁드립니다.
+
+---
+### 리뷰 (by User)
+-
+
+### 다음 작업 지시
+-
