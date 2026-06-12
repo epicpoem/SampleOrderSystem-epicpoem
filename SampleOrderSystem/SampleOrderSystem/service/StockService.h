@@ -20,6 +20,7 @@ public:
     std::optional<Sample> findSampleById(const std::string& id) const;
 
     std::time_t now() const;
+    std::string today() const;  // YYYYMMDD
 
 private:
     ISampleRepository& sampleRepo_;

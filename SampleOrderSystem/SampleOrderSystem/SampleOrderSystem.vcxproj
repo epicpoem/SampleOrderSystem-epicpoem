@@ -157,6 +157,8 @@
     <ClCompile Include="controller\MonitorController.cpp" />
     <ClCompile Include="view\ProductionView.cpp" />
     <ClCompile Include="controller\ProductionController.cpp" />
+    <ClCompile Include="view\ReleaseView.cpp" />
+    <ClCompile Include="controller\ReleaseController.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="model\Sample.h" />
@@ -185,6 +187,10 @@
     <ClInclude Include="controller\MonitorController.h" />
     <ClInclude Include="view\IProductionView.h" />
     <ClInclude Include="view\ProductionView.h" />
+    <ClInclude Include="controller\ProductionController.h" />
+    <ClInclude Include="view\IReleaseView.h" />
+    <ClInclude Include="view\ReleaseView.h" />
+    <ClInclude Include="controller\ReleaseController.h" />
     <ClInclude Include="controller\ProductionController.h" />
   </ItemGroup>
   <ItemGroup>

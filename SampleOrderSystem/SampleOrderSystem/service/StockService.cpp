@@ -53,3 +53,7 @@ std::optional<Sample> StockService::findSampleById(const std::string& id) const 
 std::time_t StockService::now() const {
     return clock_.now();
 }
+
+std::string StockService::today() const {
+    return clock_.today();
+}

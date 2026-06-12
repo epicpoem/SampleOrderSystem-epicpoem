@@ -5,6 +5,7 @@
 #include "controller/ApprovalController.h"
 #include "controller/MonitorController.h"
 #include "controller/ProductionController.h"
+#include "controller/ReleaseController.h"
 #include "repository/JsonSampleRepository.h"
 #include "repository/JsonOrderRepository.h"
 #include "service/StockService.h"
@@ -13,6 +14,7 @@
 #include "view/ApprovalView.h"
 #include "view/MonitorView.h"
 #include "view/ProductionView.h"
+#include "view/ReleaseView.h"
 #include "util/SystemClock.h"
 
 static void showMainMenu(JsonSampleRepository& sampleRepo,
@@ -69,6 +71,9 @@ int main() {
     ProductionView       productionView;
     ProductionController productionCtrl(std::cin, productionView, sampleRepo, orderRepo, stockService);
 
+    ReleaseView       releaseView(std::cout);
+    ReleaseController releaseCtrl(std::cin, releaseView, sampleRepo, orderRepo, stockService);
+
     while (true) {
         for (const auto& no : stockService.checkAndCompleteProduction())
             std::cout << "[생산완료] " << no << " \xE2\x86\x92 CONFIRMED\n";
@@ -84,7 +89,7 @@ int main() {
         else if (line == "3") approvalCtrl.run();
         else if (line == "4") monitorCtrl.run();
         else if (line == "5") productionCtrl.run();
-        else if (line == "6") std::cout << "  [미구현] 출고 처리\n";
+        else if (line == "6") releaseCtrl.run();
         else                  std::cout << "  유효하지 않은 선택입니다.\n";
     }
 
