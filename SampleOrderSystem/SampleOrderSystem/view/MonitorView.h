@@ -9,7 +9,8 @@ public:
     void showMenu() override;
     void showOrderStats(int reserved, int confirmed, int producing, int released) override;
     void showStockTableHeader() override;
-    void showStockRow(const Sample& sample, int totalOrderedQty,
+    void showStockRow(const Sample& sample, double physStock,
+                      int totalOrderedQty,
                       const std::string& statusLabel) override;
     void showNoSamples() override;
     void showProductionCompleted(const std::string& orderNo) override;

@@ -44,11 +44,13 @@ void MonitorController::run() {
                 totalQty += o.quantity;
         }
 
-        std::string statusLabel;
-        if (s.stock == 0)              statusLabel = "고갈";
-        else if (s.stock >= totalQty)  statusLabel = "여유";
-        else                           statusLabel = "부족";
+        double physStock = stockService_.calcPhysicalStock(s);
 
-        view_.showStockRow(s, totalQty, statusLabel);
+        std::string statusLabel;
+        if (physStock <= 0.0)               statusLabel = "\xEA\xB3\xA0\xEA\xB0\x88";
+        else if (physStock >= (double)totalQty) statusLabel = "\xEC\x97\xAC\xEC\x9C\xA0";
+        else                                statusLabel = "\xEB\xB6\x80\xEC\xA1\xB1";
+
+        view_.showStockRow(s, physStock, totalQty, statusLabel);
     }
 }
