@@ -162,3 +162,39 @@
 
 ### 다음 작업 지시
 - Negative TC 구현 및 테스트
+
+---
+
+## [2026-06-12] Negative TC 구현 및 테스트
+
+### 작업 내용
+- `SampleControllerTest.cpp`에 7개 Negative/Edge-case TC 추가
+  - `NegativeAvgTimeShowsOutOfRangeAndRetries`: 음수 평균생산시간 → 오류 후 재입력
+  - `YieldExactlyZeroShowsOutOfRangeError`: 수율 0.0 경계값 → 범위 오류
+  - `YieldExactlyOneSucceeds`: 수율 1.0 경계값 → 등록 성공 (포함 경계)
+  - `EmptyIdRepromptsUntilValidIdEntered`: 빈 ID 입력 → 루프 재입력
+  - `NonNumericAvgTimeTriggersRetryAndOutOfRangeError`: 비숫자 평균시간 → stod 예외 → 0.0 → 오류 후 재입력
+  - `NonNumericYieldShowsOutOfRangeError`: 비숫자 수율 → stod 예외 → 0.0 → 범위 오류
+  - `SearchByYieldWithHighThresholdShowsNoResults`: 임계값보다 낮은 수율만 존재 → 검색 결과 없음
+- `JsonSampleRepositoryTest.cpp`에 4개 Negative/Edge-case TC 추가
+  - `MissingFileReturnsEmptyList`: 파일 없음 → 빈 목록 반환 (크래시 없음)
+  - `CorruptedJsonFileReturnsEmptyAndDoesNotCrash`: 손상된 JSON → 복구 후 빈 목록
+  - `DecreaseStockByExactAmountSucceeds`: 재고 정확히 일치 수량 차감 → 성공, 재고 0
+  - `DecreaseStockByZeroAmountSucceeds`: 0 수량 차감 → 성공, 재고 변화 없음
+
+### 커밋
+- `d46b81b` [AI-Test] Negative TC 추가 - 경계값/예외 입력/파일 손상 케이스 (38/38 PASS)
+
+### 리뷰 요청
+- 기존 27개 + 신규 11개 = 총 38개 테스트 전부 PASS 확인되었습니다.
+- 신규 TC 항목 및 커버리지 수준이 적절한지 확인 부탁드립니다.
+- 이상 없으면 Feature-02(시료 주문) 구현 진행 지시 부탁드립니다.
+
+---
+### 리뷰 (by User)
+- Positive/Negative TC 구현 확인, 커버리지 적절한 것으로 판단
+- PoC 구현 구조대로 초안 구현된 것 코드리뷰 완료
+- TC 직접 실행하여 확인, 정상 테스트 확인 
+
+### 다음 작업 지시
+- Feature-02 구현 지시
