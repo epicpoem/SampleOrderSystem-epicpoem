@@ -79,7 +79,7 @@ public:
     MOCK_METHOD(void, showOrderStats, (int, int, int, int), (override));
     MOCK_METHOD(void, showStockTableHeader, (), (override));
     MOCK_METHOD(void, showStockRow,
-                (const Sample&, int, const std::string&), (override));
+                (const Sample&, double, int, const std::string&), (override));
     MOCK_METHOD(void, showNoSamples, (), (override));
     MOCK_METHOD(void, showProductionCompleted, (const std::string&), (override));
 };
@@ -142,14 +142,14 @@ TEST_F(MonitorControllerTest, RejectedOrdersExcludedFromStats) {
 // ── 재고 상태 ────────────────────────────────────────────────────────────────
 
 TEST_F(MonitorControllerTest, StockStatusExcess_WhenStockCoversAll) {
-    // stock=100, CONFIRMED qty=50 → 여유
+    // stock=100, CONFIRMED qty=50 → physStock=100 → 여유
     orderRepo.add(makeOrder("O-1", "S-001", 50, OrderStatus::CONFIRMED));
 
     NiceMock<MockMonitorView> view;
     std::istringstream in("");
     MonitorController ctrl(in, view, sampleRepo, orderRepo, stockService);
 
-    EXPECT_CALL(view, showStockRow(_, 50, std::string("여유"))).Times(1);
+    EXPECT_CALL(view, showStockRow(_, _, 50, std::string("여유"))).Times(1);
     ctrl.run();
 }
 
@@ -162,7 +162,7 @@ TEST_F(MonitorControllerTest, StockStatusShortage_WhenStockLessThanOrdered) {
     std::istringstream in("");
     MonitorController ctrl(in, view, sampleRepo, orderRepo, stockService);
 
-    EXPECT_CALL(view, showStockRow(_, 150, std::string("부족"))).Times(1);
+    EXPECT_CALL(view, showStockRow(_, _, 150, std::string("부족"))).Times(1);
     ctrl.run();
 }
 
@@ -176,8 +176,8 @@ TEST_F(MonitorControllerTest, StockStatusDepleted_WhenStockIsZero) {
     std::istringstream in("");
     MonitorController ctrl(in, view, sampleRepo, orderRepo, stockService);
 
-    EXPECT_CALL(view, showStockRow(_, 0,  std::string("여유"))).Times(1);
-    EXPECT_CALL(view, showStockRow(_, 50, std::string("고갈"))).Times(1);
+    EXPECT_CALL(view, showStockRow(_, _, 0,  std::string("여유"))).Times(1);
+    EXPECT_CALL(view, showStockRow(_, _, 50, std::string("고갈"))).Times(1);
     ctrl.run();
 }
 
@@ -189,7 +189,7 @@ TEST_F(MonitorControllerTest, StockStatus_ReservedOrderExcluded) {
     std::istringstream in("");
     MonitorController ctrl(in, view, sampleRepo, orderRepo, stockService);
 
-    EXPECT_CALL(view, showStockRow(_, 0, std::string("여유"))).Times(1);
+    EXPECT_CALL(view, showStockRow(_, _, 0, std::string("여유"))).Times(1);
     ctrl.run();
 }
 
@@ -203,7 +203,7 @@ TEST_F(MonitorControllerTest, ReleaseOrderExcludedFromStockCalculation) {
     std::istringstream in("");
     MonitorController ctrl(in, view, sampleRepo, orderRepo, stockService);
 
-    EXPECT_CALL(view, showStockRow(_, 0, std::string("여유"))).Times(1);
+    EXPECT_CALL(view, showStockRow(_, _, 0, std::string("여유"))).Times(1);
     ctrl.run();
 }
 
@@ -218,7 +218,36 @@ TEST_F(MonitorControllerTest, StockBoundaryOneLessThanOrdered) {
     std::istringstream in("");
     MonitorController ctrl(in, view, sampleRepo, orderRepo, stockService);
 
-    EXPECT_CALL(view, showStockRow(_, 101, std::string("부족"))).Times(1);
+    EXPECT_CALL(view, showStockRow(_, _, 101, std::string("부족"))).Times(1);
+    ctrl.run();
+}
+
+TEST_F(MonitorControllerTest, PhysicalStockFromProducingProgressIsReflected) {
+    // S-002: stock=0, PRODUCING actualProd=100, totalProdTime=100min, elapsed=50min
+    // physStock = 0 + 100 * (50/100) = 50.0
+    // totalQty = 80 (PRODUCING order qty), physStock=50 < 80 → "부족" (not "고갈")
+    sampleRepo.add({"S-002", "GaN", 1.0, 0.9, 0});
+
+    Order prod;
+    prod.orderNo                = "O-1";
+    prod.sampleId               = "S-002";
+    prod.quantity               = 80;
+    prod.status                 = OrderStatus::PRODUCING;
+    prod.actualProduction       = 100;
+    prod.totalProductionTimeMin = 100.0;
+    prod.productionStartTime    = 0;
+    orderRepo.add(prod);
+
+    clock.setNow(3000);  // 3000s = 50min elapsed → progress 0.5 → physStock 50
+
+    NiceMock<MockMonitorView> view;
+    std::istringstream in("");
+    MonitorController ctrl(in, view, sampleRepo, orderRepo, stockService);
+
+    // S-001 (stock=100, no orders for S-001): physStock=100, totalQty=0 → "여유"
+    EXPECT_CALL(view, showStockRow(_, _, 0, std::string("여유"))).Times(1);
+    // S-002: physStock=50 (>0), totalQty=80 (50<80) → "부족"
+    EXPECT_CALL(view, showStockRow(_, _, 80, std::string("부족"))).Times(1);
     ctrl.run();
 }
 

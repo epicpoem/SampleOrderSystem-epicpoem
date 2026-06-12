@@ -197,6 +197,85 @@ TEST_F(ReleaseControllerTest, MultipleConfirmedOrdersPickSecond) {
     EXPECT_EQ(sampleRepo.findById("S-001")->stock, 150);
 }
 
+TEST_F(ReleaseControllerTest, ReservedOrderNotShownInReleaseList) {
+    // RESERVED 주문만 있을 때 출고 목록이 비어야 함
+    Order o;
+    o.orderNo      = "ORD-20260612-0001";
+    o.sampleId     = "S-001";
+    o.customerName = "CustA";
+    o.quantity     = 50;
+    o.status       = OrderStatus::RESERVED;
+    orderRepo.add(o);
+
+    NiceMock<MockReleaseView> view;
+    std::istringstream in("");
+    ReleaseController ctrl(in, view, sampleRepo, orderRepo, stockService);
+
+    EXPECT_CALL(view, showNoConfirmedOrders()).Times(1);
+    EXPECT_CALL(view, showReleaseCompleted(_, _)).Times(0);
+    ctrl.run();
+
+    EXPECT_EQ(orderRepo.findByNo("ORD-20260612-0001")->status, OrderStatus::RESERVED);
+}
+
+TEST_F(ReleaseControllerTest, ProducingOrderNotShownInReleaseList) {
+    // PRODUCING 주문만 있을 때 출고 목록이 비어야 함
+    Order o;
+    o.orderNo                = "ORD-20260612-0001";
+    o.sampleId               = "S-001";
+    o.customerName           = "CustA";
+    o.quantity               = 50;
+    o.status                 = OrderStatus::PRODUCING;
+    o.actualProduction       = 60;
+    o.totalProductionTimeMin = 999.0;  // 아직 완료되지 않음
+    o.productionStartTime    = 0;
+    orderRepo.add(o);
+
+    NiceMock<MockReleaseView> view;
+    std::istringstream in("");
+    ReleaseController ctrl(in, view, sampleRepo, orderRepo, stockService);
+
+    EXPECT_CALL(view, showNoConfirmedOrders()).Times(1);
+    EXPECT_CALL(view, showReleaseCompleted(_, _)).Times(0);
+    ctrl.run();
+
+    EXPECT_EQ(orderRepo.findByNo("ORD-20260612-0001")->status, OrderStatus::PRODUCING);
+}
+
+TEST_F(ReleaseControllerTest, ReleasedOrderNotShownInReleaseList) {
+    // 이미 RELEASE된 주문만 있을 때 출고 목록이 비어야 함
+    Order o;
+    o.orderNo      = "ORD-20260612-0001";
+    o.sampleId     = "S-001";
+    o.customerName = "CustA";
+    o.quantity     = 50;
+    o.status       = OrderStatus::RELEASE;
+    orderRepo.add(o);
+
+    NiceMock<MockReleaseView> view;
+    std::istringstream in("");
+    ReleaseController ctrl(in, view, sampleRepo, orderRepo, stockService);
+
+    EXPECT_CALL(view, showNoConfirmedOrders()).Times(1);
+    ctrl.run();
+}
+
+TEST_F(ReleaseControllerTest, StockExactlyZeroAfterRelease) {
+    // stock=50, release qty=50 → stock이 정확히 0이 되어야 함
+    sampleRepo.add({"S-002", "GaN", 1.0, 0.9, 50});
+    orderRepo.add(makeConfirmed("ORD-20260612-0001", "S-002", 50));
+
+    NiceMock<MockReleaseView> view;
+    std::istringstream in("1\n");
+    ReleaseController ctrl(in, view, sampleRepo, orderRepo, stockService);
+    ctrl.run();
+
+    auto s = sampleRepo.findById("S-002");
+    ASSERT_TRUE(s.has_value());
+    EXPECT_EQ(s->stock, 0);
+    EXPECT_EQ(orderRepo.findByNo("ORD-20260612-0001")->status, OrderStatus::RELEASE);
+}
+
 TEST_F(ReleaseControllerTest, ProductionCompletedAutoConvertThenRelease) {
     // PRODUCING order completes on menu entry -> becomes CONFIRMED -> released
     Order prod;
