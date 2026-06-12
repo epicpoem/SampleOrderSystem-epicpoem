@@ -134,11 +134,14 @@
     <ClCompile Include="test_main.cpp" />
     <ClCompile Include="unit\SampleControllerTest.cpp" />
     <ClCompile Include="unit\JsonSampleRepositoryTest.cpp" />
+    <ClCompile Include="unit\OrderControllerTest.cpp" />
     <!-- Main project source files (main.cpp 제외) -->
     <ClCompile Include="..\SampleOrderSystem\repository\JsonSampleRepository.cpp" />
     <ClCompile Include="..\SampleOrderSystem\repository\JsonOrderRepository.cpp" />
     <ClCompile Include="..\SampleOrderSystem\view\SampleView.cpp" />
+    <ClCompile Include="..\SampleOrderSystem\view\OrderView.cpp" />
     <ClCompile Include="..\SampleOrderSystem\controller\SampleController.cpp" />
+    <ClCompile Include="..\SampleOrderSystem\controller\OrderController.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

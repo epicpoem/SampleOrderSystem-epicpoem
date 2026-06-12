@@ -1,9 +1,11 @@
 ﻿#include <windows.h>
 #include <iostream>
 #include "controller/SampleController.h"
+#include "controller/OrderController.h"
 #include "repository/JsonSampleRepository.h"
 #include "repository/JsonOrderRepository.h"
 #include "view/SampleView.h"
+#include "view/OrderView.h"
 #include "util/SystemClock.h"
 
 static void showMainMenu(const JsonSampleRepository& sampleRepo,
@@ -45,6 +47,9 @@ int main() {
     SampleView       sampleView;
     SampleController sampleCtrl(std::cin, sampleView, sampleRepo);
 
+    OrderView        orderView;
+    OrderController  orderCtrl(std::cin, orderView, sampleRepo, orderRepo, clock);
+
     while (true) {
         showMainMenu(sampleRepo, orderRepo);
 
@@ -53,7 +58,7 @@ int main() {
 
         if      (line == "0") break;
         else if (line == "1") sampleCtrl.run();
-        else if (line == "2") std::cout << "  [미구현] 시료 주문\n";
+        else if (line == "2") orderCtrl.run();
         else if (line == "3") std::cout << "  [미구현] 주문 승인/거절\n";
         else if (line == "4") std::cout << "  [미구현] 모니터링\n";
         else if (line == "5") std::cout << "  [미구현] 생산라인 조회\n";

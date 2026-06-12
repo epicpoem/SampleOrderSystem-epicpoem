@@ -147,7 +147,9 @@
     <ClCompile Include="repository\JsonSampleRepository.cpp" />
     <ClCompile Include="repository\JsonOrderRepository.cpp" />
     <ClCompile Include="view\SampleView.cpp" />
+    <ClCompile Include="view\OrderView.cpp" />
     <ClCompile Include="controller\SampleController.cpp" />
+    <ClCompile Include="controller\OrderController.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="model\Sample.h" />
@@ -155,14 +157,18 @@
     <ClInclude Include="model\OrderStatus.h" />
     <ClInclude Include="util\IClock.h" />
     <ClInclude Include="util\SystemClock.h" />
+    <ClInclude Include="util\FakeClock.h" />
     <ClInclude Include="repository\ISampleRepository.h" />
     <ClInclude Include="repository\IOrderRepository.h" />
     <ClInclude Include="repository\JsonSampleRepository.h" />
     <ClInclude Include="repository\JsonOrderRepository.h" />
     <ClInclude Include="view\ISampleView.h" />
     <ClInclude Include="view\SampleView.h" />
+    <ClInclude Include="view\IOrderView.h" />
+    <ClInclude Include="view\OrderView.h" />
     <ClInclude Include="controller\IController.h" />
     <ClInclude Include="controller\SampleController.h" />
+    <ClInclude Include="controller\OrderController.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
