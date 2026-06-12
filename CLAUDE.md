@@ -191,9 +191,25 @@ PRD.md 작성 → FEATURES/ 각 파일 작성 → 커밋 → 사용자 리뷰 �
 
 ## 개발 환경 및 테스트 정책
 
+### 프로젝트 위치 및 빌드 환경
+- **MSVC 프로젝트** 사용: `SampleOrderSystem/SampleOrderSystem/` 폴더 내 Visual Studio 프로젝트 기준으로 작업
+- 빌드 시스템: Visual Studio (MSVC) — CMake가 아닌 `.sln` / `.vcxproj` 기준
+
+### 한글 인코딩 처리 (필수)
+- **소스 파일 인코딩**: 모든 `.cpp` / `.h` 파일은 **UTF-8 with BOM** 으로 저장
+  - MSVC는 BOM 없는 UTF-8 파일을 EUC-KR로 오해하여 한글 주석이 깨짐
+  - 파일 신규 생성 시 반드시 BOM 포함 UTF-8로 저장할 것
+- **콘솔 출력 한글 인코딩**: `main()` 진입부에 아래 코드 반드시 포함
+  ```cpp
+  #include <windows.h>
+  SetConsoleOutputCP(CP_UTF8);
+  SetConsoleCP(CP_UTF8);
+  ```
+  - 미적용 시 Windows 기본 코드페이지(949, EUC-KR)로 인해 콘솔 출력 한글 깨짐 발생
+
 ### 개발 언어
 - **C++** (C++17 이상 권장)
-- 빌드 시스템: CMake 사용 권장
+- 빌드 시스템: Visual Studio (MSVC)
 
 ### 테스트 프레임워크
 - **Google Mock (gmock) / Google Test (gtest)**
