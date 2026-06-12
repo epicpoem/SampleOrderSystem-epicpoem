@@ -92,3 +92,45 @@
 - 코드 작업에는 ConsoleMVC PoC 에서 정의한 구조를 참조
 - 코드 작업시 데이터 영속성 (프로그램 재실행 시에도 마지막 상태를 유지) 보유하도록 DataPersistence PoC에서 구현한 CRUD를 참조
 - PoC간 충돌나는게 없도록 구현
+
+---
+
+## [2026-06-12] Feature-01 시료 관리 구현
+
+### 작업 내용
+- PoC 재확인 (ConsoleMVC / DataPersistence / DataMonitor / DummyDataGenerator)
+  - ConsoleMVC: `avgProductionTime`, `ISampleRepository::add()` 등 인터페이스 설계 확인
+  - DataPersistence: nlohmann/json CRUD 패턴, 주문번호 채번 방식 확인
+  - PoC 간 필드명 통일 (`avgProductionTime` 사용, `orderNo` 통일)
+- 공통 인프라 구현
+  - `model/`: Sample, Order, OrderStatus (ConsoleMVC 구조 재사용)
+  - `util/`: IClock / SystemClock (시간 추상화)
+  - `repository/`: ISampleRepository, IOrderRepository 인터페이스
+  - `repository/`: JsonSampleRepository, JsonOrderRepository (DataPersistence 패턴 적용)
+- Feature-01 구현
+  - `view/`: ISampleView 인터페이스, SampleView (ostream 주입으로 테스트 가능 구조)
+  - `controller/`: IController, SampleController (등록/목록/검색)
+  - `main.cpp`: 메인 메뉴 스켈레톤 (Feature-01 동작, 2-6 미구현 표시)
+- 테스트 프로젝트 구성
+  - `SampleOrderSystemTest.vcxproj` 신규 생성 (ConsoleMVCTest 구조 참조)
+  - `unit/SampleControllerTest.cpp`: 14개 테스트 (InMemorySampleRepository 활용)
+  - `unit/JsonSampleRepositoryTest.cpp`: 12개 테스트 (임시 파일 기반 영속성 검증)
+- 모든 .cpp/.h 파일 UTF-8 with BOM 저장 (`/utf-8` 컴파일러 옵션 추가)
+- nlohmann/json v3.11.3 DataPersistence PoC에서 복사
+
+### 커밋
+- `f50de63` [AI-Feature] Feature-01 시료 관리 구현 (모델/리포지토리/뷰/컨트롤러)
+- `17b06d8` [AI-Test] Feature-01 단위 테스트 추가 (SampleController, JsonSampleRepository)
+- `6f10f47` [AI-Chore] VS가 slnx에 프로젝트 GUID 자동 추가
+
+### 리뷰 요청
+- Visual Studio에서 `SampleOrderSystem.slnx` 열어 **Debug|x64** 빌드 및 실행 가능 여부 확인 부탁드립니다.
+- `SampleOrderSystemTest` 프로젝트 빌드 후 테스트 실행 결과 확인 부탁드립니다.
+- Feature-01 동작(시료 등록/조회/검색) 정상 여부 확인 후 Feature-02(시료 주문) 진행 지시 부탁드립니다.
+
+---
+### 리뷰 (by User)
+- 구현 내용에서 빌드 불가
+
+### 다음 작업 지시
+- 직접 MSVC를 사용해서 빌드하여 원인 파악 수정
