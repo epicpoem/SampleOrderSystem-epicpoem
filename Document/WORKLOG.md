@@ -296,3 +296,30 @@
 
 ### 다음 작업 지시
 - Feature-03 구현 진행
+
+## [2026-06-12] Feature-03 주문 승인/거절 구현
+
+### 작업 내용
+- `ApprovalController` 구현: 물리적 재고 계산, RESERVED→CONFIRMED/PRODUCING/REJECTED 전이
+- `checkAndCompleteProduction()`: 메뉴 진입 시 경과시간 체크 → 완료 시 CONFIRMED 전환 + stock 증가
+- `calcPhysicalStock()`: `sample.stock + Σ(PRODUCING.actualProd * min(1.0, elapsed/total))`
+- `IApprovalView` / `ApprovalView` 구현 (12개 메서드)
+- `main.cpp`에 ApprovalController 연결 (메뉴 "3")
+- `ApprovalControllerTest.cpp`: 15개 테스트 (87/87 전체 통과)
+- 버그 수정: 생산 완료 전환 시 `sample.stock += actualProduction` 누락 → 수정 후 테스트 통과
+
+### 커밋
+- `4e0ab07` [AI-Feature] Feature-03 주문 승인/거절 구현 (물리적재고/생산량계산/완료감지)
+
+### 리뷰 요청
+- 물리적 재고 계산 공식 (`physStock = stock + Σ(actualProd * ratio)`) 구현 확인 요청
+- 생산 완료 시 `sample.stock` 업데이트 처리 확인 요청 (PRODUCING→CONFIRMED 전환과 동시에 재고 반영)
+- RESERVED→PRODUCING 전환 시 `actualProduction`, `totalProductionTimeMin`, `productionStartTime` 필드 기록 확인
+- 전체 87개 테스트 통과 확인
+
+---
+### 리뷰 (by User)
+- (사용자 작성)
+
+### 다음 작업 지시
+- (사용자 작성)
