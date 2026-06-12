@@ -20,4 +20,6 @@ public:
     virtual void showSearchPrompt() = 0;
     virtual void showSearchResult(const std::vector<Sample>& samples) = 0;
     virtual void showNoResults() = 0;
+    virtual void showCancelConfirmPrompt() {}
+    virtual void showRegisterCancelled() {}
 };

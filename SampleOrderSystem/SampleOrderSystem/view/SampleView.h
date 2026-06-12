@@ -22,6 +22,8 @@ public:
     void showSearchPrompt() override;
     void showSearchResult(const std::vector<Sample>& samples) override;
     void showNoResults() override;
+    void showCancelConfirmPrompt() override;
+    void showRegisterCancelled() override;
 
 private:
     std::ostream& out_;

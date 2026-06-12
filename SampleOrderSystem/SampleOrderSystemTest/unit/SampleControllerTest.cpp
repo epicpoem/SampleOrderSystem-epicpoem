@@ -57,6 +57,8 @@ public:
     MOCK_METHOD(void, showSearchPrompt, (), (override));
     MOCK_METHOD(void, showSearchResult, (const std::vector<Sample>&), (override));
     MOCK_METHOD(void, showNoResults, (), (override));
+    MOCK_METHOD(void, showCancelConfirmPrompt, (), (override));
+    MOCK_METHOD(void, showRegisterCancelled, (), (override));
 };
 
 class SampleControllerTest : public ::testing::Test {
@@ -105,7 +107,7 @@ TEST_F(SampleControllerTest, RegisterDuplicateIdShowsError) {
 
 TEST_F(SampleControllerTest, YieldBelowZeroShowsOutOfRangeError) {
     NiceMock<MockSampleView> view;
-    std::istringstream in("1\nS-001\nTest Sample\n0.5\n-0.1\n0\n");
+    std::istringstream in("1\nS-001\nTest Sample\n0.5\n-0.1\n");
     SampleController ctrl(in, view, repo);
 
     EXPECT_CALL(view, showYieldOutOfRange()).Times(1);
@@ -115,7 +117,7 @@ TEST_F(SampleControllerTest, YieldBelowZeroShowsOutOfRangeError) {
 
 TEST_F(SampleControllerTest, YieldAboveOneShowsOutOfRangeError) {
     NiceMock<MockSampleView> view;
-    std::istringstream in("1\nS-001\nTest Sample\n0.5\n1.5\n0\n");
+    std::istringstream in("1\nS-001\nTest Sample\n0.5\n1.5\n");
     SampleController ctrl(in, view, repo);
 
     EXPECT_CALL(view, showYieldOutOfRange()).Times(1);
@@ -217,7 +219,7 @@ TEST_F(SampleControllerTest, NegativeAvgTimeShowsOutOfRangeAndRetries) {
 // 수율 정확히 0.0 → 경계값, 범위 밖으로 처리되어야 함 (yield <= 0.0)
 TEST_F(SampleControllerTest, YieldExactlyZeroShowsOutOfRangeError) {
     NiceMock<MockSampleView> view;
-    std::istringstream in("1\nS-001\nTest\n0.5\n0.0\n0\n");
+    std::istringstream in("1\nS-001\nTest\n0.5\n0.0\n");
     SampleController ctrl(in, view, repo);
 
     EXPECT_CALL(view, showYieldOutOfRange()).Times(1);
@@ -262,7 +264,7 @@ TEST_F(SampleControllerTest, NonNumericAvgTimeTriggersRetryAndOutOfRangeError) {
 // 비숫자 수율 입력 → stod 예외 → 0.0 처리 → 범위 오류 (yield <= 0.0)
 TEST_F(SampleControllerTest, NonNumericYieldShowsOutOfRangeError) {
     NiceMock<MockSampleView> view;
-    std::istringstream in("1\nS-001\nTest\n0.5\nxyz\n0\n");
+    std::istringstream in("1\nS-001\nTest\n0.5\nxyz\n");
     SampleController ctrl(in, view, repo);
 
     EXPECT_CALL(view, showYieldOutOfRange()).Times(1);
@@ -307,4 +309,87 @@ TEST_F(SampleControllerTest, SearchByYieldWithHighThresholdShowsNoResults) {
 
     EXPECT_CALL(view, showNoResults()).Times(1);
     ctrl.run();
+}
+
+// ─── 취소 확인 TCs ────────────────────────────────────────────────────────────
+
+// 시료 ID 입력 중 빈 입력 → 취소 확인(Y) → 등록 취소
+TEST_F(SampleControllerTest, EmptyIdThenConfirmYCancelsRegister) {
+    NiceMock<MockSampleView> view;
+    std::istringstream in("1\n\nY\n0\n");
+    SampleController ctrl(in, view, repo);
+
+    EXPECT_CALL(view, showCancelConfirmPrompt()).Times(1);
+    EXPECT_CALL(view, showRegisterCancelled()).Times(1);
+    EXPECT_CALL(view, showRegisterSuccess(_)).Times(0);
+    ctrl.run();
+
+    EXPECT_TRUE(repo.findAll().empty());
+}
+
+// 시료 ID 입력 중 빈 입력 → 취소 거절(N) → 재입력 → 성공
+TEST_F(SampleControllerTest, EmptyIdDeclineCancelThenSucceeds) {
+    NiceMock<MockSampleView> view;
+    std::istringstream in("1\n\nN\nS-001\nTest\n0.5\n0.9\n0\n");
+    SampleController ctrl(in, view, repo);
+
+    EXPECT_CALL(view, showCancelConfirmPrompt()).Times(1);
+    EXPECT_CALL(view, showRegisterSuccess(_)).Times(1);
+    ctrl.run();
+
+    EXPECT_TRUE(repo.exists("S-001"));
+}
+
+// 이름 입력 중 빈 입력 → 취소 확인(Y) → 등록 취소
+TEST_F(SampleControllerTest, EmptyNameThenConfirmYCancelsRegister) {
+    NiceMock<MockSampleView> view;
+    std::istringstream in("1\nS-001\n\nY\n0\n");
+    SampleController ctrl(in, view, repo);
+
+    EXPECT_CALL(view, showCancelConfirmPrompt()).Times(1);
+    EXPECT_CALL(view, showRegisterCancelled()).Times(1);
+    ctrl.run();
+
+    EXPECT_FALSE(repo.exists("S-001"));
+}
+
+// 평균 생산시간 입력 중 빈 입력 → 취소 확인(Y) → 등록 취소
+TEST_F(SampleControllerTest, EmptyAvgTimeThenConfirmYCancelsRegister) {
+    NiceMock<MockSampleView> view;
+    std::istringstream in("1\nS-001\nTest\n\nY\n0\n");
+    SampleController ctrl(in, view, repo);
+
+    EXPECT_CALL(view, showCancelConfirmPrompt()).Times(1);
+    EXPECT_CALL(view, showRegisterCancelled()).Times(1);
+    ctrl.run();
+
+    EXPECT_FALSE(repo.exists("S-001"));
+}
+
+// 수율 입력 중 빈 입력 → 취소 확인(Y) → 등록 취소
+TEST_F(SampleControllerTest, EmptyYieldThenConfirmYCancelsRegister) {
+    NiceMock<MockSampleView> view;
+    std::istringstream in("1\nS-001\nTest\n0.5\n\nY\n0\n");
+    SampleController ctrl(in, view, repo);
+
+    EXPECT_CALL(view, showCancelConfirmPrompt()).Times(1);
+    EXPECT_CALL(view, showRegisterCancelled()).Times(1);
+    ctrl.run();
+
+    EXPECT_FALSE(repo.exists("S-001"));
+}
+
+// 수율 입력 중 빈 입력 → 취소 거절(N) → 유효 수율 재입력 → 성공
+TEST_F(SampleControllerTest, EmptyYieldDeclineCancelThenSucceeds) {
+    NiceMock<MockSampleView> view;
+    std::istringstream in("1\nS-001\nTest\n0.5\n\nN\n0.9\n0\n");
+    SampleController ctrl(in, view, repo);
+
+    EXPECT_CALL(view, showCancelConfirmPrompt()).Times(1);
+    EXPECT_CALL(view, showRegisterSuccess(_)).Times(1);
+    ctrl.run();
+
+    auto s = repo.findById("S-001");
+    ASSERT_TRUE(s.has_value());
+    EXPECT_DOUBLE_EQ(s->yield, 0.9);
 }

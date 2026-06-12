@@ -13,6 +13,7 @@ private:
     void handleRegister();
     void handleList();
     void handleSearch();
+    bool askCancelRegister();
 
     std::istream& in_;
     ISampleView& view_;
