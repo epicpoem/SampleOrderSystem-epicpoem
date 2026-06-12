@@ -19,6 +19,7 @@ public:
     void showOrderCancelled() override;
     void showInvalidSampleId() override;
     void showInvalidQuantity() override;
+    void showCancelConfirmPrompt() override;
 
 private:
     std::ostream& out_;

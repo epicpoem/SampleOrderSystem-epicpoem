@@ -50,3 +50,7 @@ void OrderView::showInvalidSampleId() {
 void OrderView::showInvalidQuantity() {
     out_ << "[오류] 수량은 1 이상이어야 합니다.\n";
 }
+
+void OrderView::showCancelConfirmPrompt() {
+    out_ << "주문을 취소하시겠습니까? [Y/N] > ";
+}

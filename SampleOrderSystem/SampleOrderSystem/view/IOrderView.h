@@ -17,4 +17,5 @@ public:
     virtual void showOrderCancelled() = 0;
     virtual void showInvalidSampleId() = 0;
     virtual void showInvalidQuantity() = 0;
+    virtual void showCancelConfirmPrompt() = 0;
 };

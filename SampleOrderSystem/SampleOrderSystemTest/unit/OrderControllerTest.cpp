@@ -95,6 +95,7 @@ public:
     MOCK_METHOD(void, showOrderCancelled, (), (override));
     MOCK_METHOD(void, showInvalidSampleId, (), (override));
     MOCK_METHOD(void, showInvalidQuantity, (), (override));
+    MOCK_METHOD(void, showCancelConfirmPrompt, (), (override));
 };
 
 // ── Fixture ───────────────────────────────────────────────────────────────
@@ -226,11 +227,13 @@ TEST_F(OrderControllerTest, NonNumericQuantityShowsErrorAndRetries) {
     EXPECT_EQ(orderRepo.findAll()[0].quantity, 20);
 }
 
-TEST_F(OrderControllerTest, EmptySampleIdRepromptsUntilValid) {
+// 빈 ID 입력 → 취소 거절(N) → 재입력 → 성공
+TEST_F(OrderControllerTest, EmptySampleIdDeclineCancelThenSucceeds) {
     NiceMock<MockOrderView> view;
-    std::istringstream in("\n\nS-001\n고객A\n10\nY\n");
+    std::istringstream in("\nN\nS-001\n고객A\n10\nY\n");
     OrderController ctrl(in, view, sampleRepo, orderRepo, clock);
 
+    EXPECT_CALL(view, showCancelConfirmPrompt()).Times(1);
     EXPECT_CALL(view, showOrderSuccess(_)).Times(1);
     ctrl.run();
 
@@ -246,4 +249,58 @@ TEST_F(OrderControllerTest, LowerCaseYAlsoConfirmsOrder) {
     ctrl.run();
 
     EXPECT_EQ(orderRepo.findAll().size(), 1u);
+}
+
+// ── 빈 입력 취소 TC ──────────────────────────────────────────────────────────
+
+// 시료 ID 입력 중 빈 문자열 → 취소 확인(Y) → 주문 취소
+TEST_F(OrderControllerTest, EmptySampleIdThenConfirmYCancelsOrder) {
+    NiceMock<MockOrderView> view;
+    std::istringstream in("\nY\n");
+    OrderController ctrl(in, view, sampleRepo, orderRepo, clock);
+
+    EXPECT_CALL(view, showCancelConfirmPrompt()).Times(1);
+    EXPECT_CALL(view, showOrderCancelled()).Times(1);
+    ctrl.run();
+
+    EXPECT_TRUE(orderRepo.findAll().empty());
+}
+
+// 고객명 입력 중 빈 문자열 → 취소 확인(Y) → 주문 취소
+TEST_F(OrderControllerTest, EmptyCustomerNameThenConfirmYCancelsOrder) {
+    NiceMock<MockOrderView> view;
+    std::istringstream in("S-001\n\nY\n");
+    OrderController ctrl(in, view, sampleRepo, orderRepo, clock);
+
+    EXPECT_CALL(view, showCancelConfirmPrompt()).Times(1);
+    EXPECT_CALL(view, showOrderCancelled()).Times(1);
+    ctrl.run();
+
+    EXPECT_TRUE(orderRepo.findAll().empty());
+}
+
+// 수량 입력 중 빈 문자열 → 취소 확인(Y) → 주문 취소
+TEST_F(OrderControllerTest, EmptyQuantityThenConfirmYCancelsOrder) {
+    NiceMock<MockOrderView> view;
+    std::istringstream in("S-001\n고객A\n\nY\n");
+    OrderController ctrl(in, view, sampleRepo, orderRepo, clock);
+
+    EXPECT_CALL(view, showCancelConfirmPrompt()).Times(1);
+    EXPECT_CALL(view, showOrderCancelled()).Times(1);
+    ctrl.run();
+
+    EXPECT_TRUE(orderRepo.findAll().empty());
+}
+
+// 수량 입력 중 빈 문자열 → 취소 거절(N) → 유효 수량 재입력 → 성공
+TEST_F(OrderControllerTest, EmptyQuantityDeclineCancelThenSucceeds) {
+    NiceMock<MockOrderView> view;
+    std::istringstream in("S-001\n고객A\n\nN\n50\nY\n");
+    OrderController ctrl(in, view, sampleRepo, orderRepo, clock);
+
+    EXPECT_CALL(view, showCancelConfirmPrompt()).Times(1);
+    EXPECT_CALL(view, showOrderSuccess(_)).Times(1);
+    ctrl.run();
+
+    EXPECT_EQ(orderRepo.findAll()[0].quantity, 50);
 }

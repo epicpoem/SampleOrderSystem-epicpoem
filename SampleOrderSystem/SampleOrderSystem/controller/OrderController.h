@@ -15,6 +15,8 @@ public:
     void run() override;
 
 private:
+    bool confirmCancelOnEmpty();
+
     std::istream& in_;
     IOrderView& view_;
     ISampleRepository& sampleRepo_;
