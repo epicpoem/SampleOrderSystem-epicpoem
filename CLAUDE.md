@@ -225,14 +225,18 @@ PRD.md 작성 → FEATURES/ 각 파일 작성 → 커밋 → 사용자 리뷰 �
 WORKLOG 파일 위치: `Document/WORKLOG.md`
 
 ```
-1. 작업 시작 전     → Document/WORKLOG.md 열어 최신 [USER-Review] 내용 확인
+1. 작업 시작 전     → Document/WORKLOG.md 열어 최신 내용 확인 (파일 맨 아래가 최신)
+                      사용자가 수정한 내용(리뷰/다음 지시)이 있으면 [USER-Review] 헤더로 즉시 커밋 및 푸시 (별도 요청 불필요)
 2. 작업 및 커밋     → 기능 단위로 [AI-xxx] 헤더로 커밋
-3. WORKLOG 업데이트 → 작업 내용 요약, 커밋 해시, 리뷰 요청사항 기록 (커밋 안 함)
-4. 사용자 리뷰      → 사용자가 WORKLOG에 피드백/다음 지시 작성
-5. 커밋 요청        → 사용자가 커밋 요청 시, Agent가 [USER-Review] 헤더로 커밋 및 푸시
-6. 다음 작업        → [USER-Review] 내용 기반으로 작업 후 [AI-xxx] 커밋
-7. 3번으로 반복
+3. WORKLOG 업데이트 → 새 항목을 파일 맨 아래에 추가
+                      작업 내용 요약, 커밋 해시, 리뷰 요청사항 기록 (커밋 안 함)
+4. 리뷰 요청        → 사용자에게 WORKLOG 확인 및 리뷰 요청
+5. 사용자 리뷰      → 사용자가 WORKLOG에 피드백/다음 지시 작성
+6. 1번으로 반복
 ```
+
+> **규칙**: 작업 시작 시 WORKLOG에 사용자 수정사항이 있으면, 반드시 먼저 `[USER-Review]` 헤더로 커밋 및 푸시한 뒤 작업을 시작한다. **별도 커밋 요청 없이 자동으로 수행한다.**
+> **WORKLOG 작성 방향**: 새 항목은 항상 파일 **맨 아래**에 추가한다. 위쪽이 오래된 항목, 아래쪽이 최신 항목.
 
 ### 커밋 메시지 컨벤션
 
@@ -244,7 +248,7 @@ WORKLOG 파일 위치: `Document/WORKLOG.md`
 | `[AI-Refactoring]` | Agent | 리팩토링 (기능 변경 없음) |
 | `[AI-Docs]` | Agent | 문서 작성/수정 (PRD, README 등) |
 | `[AI-Chore]` | Agent | 빌드 설정, 의존성 추가, 프로젝트 초기 구성 |
-| `[USER-Review]` | Agent | 사용자가 WORKLOG 업데이트 후 커밋 요청 시 |
+| `[USER-Review]` | Agent | 사용자 WORKLOG 수정 확인 시 자동 커밋 (별도 요청 불필요) |
 
 예시:
 ```
