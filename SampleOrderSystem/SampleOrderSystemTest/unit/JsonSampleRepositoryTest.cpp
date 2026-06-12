@@ -1,5 +1,6 @@
 ﻿#include <gtest/gtest.h>
 #include <filesystem>
+#include <fstream>
 #include <string>
 #include "SampleOrderSystem/repository/JsonSampleRepository.h"
 
@@ -143,4 +144,48 @@ TEST_F(JsonSampleRepositoryTest, DataPersistsAcrossRepositoryInstances) {
         EXPECT_EQ(result->name, "영속성 테스트");
         EXPECT_EQ(result->stock, 50);
     }
+}
+
+// ─── Negative / Edge-case TCs ─────────────────────────────────────────────
+
+// 파일 없음 → 빈 목록 반환 (크래시 없음)
+TEST_F(JsonSampleRepositoryTest, MissingFileReturnsEmptyList) {
+    JsonSampleRepository repo(testFilePath);
+
+    EXPECT_TRUE(repo.findAll().empty());
+}
+
+// 손상된 JSON 파일 → 로드 시 빈 목록으로 복구 (예외 전파 없음)
+TEST_F(JsonSampleRepositoryTest, CorruptedJsonFileReturnsEmptyAndDoesNotCrash) {
+    {
+        std::ofstream bad(testFilePath);
+        bad << "{ this is NOT valid JSON !!! }}}";
+    }
+
+    JsonSampleRepository repo(testFilePath);
+    EXPECT_TRUE(repo.findAll().empty());
+}
+
+// 재고 정확히 일치하는 수량 차감 → 성공, 재고 0 이 됨 (경계값)
+TEST_F(JsonSampleRepositoryTest, DecreaseStockByExactAmountSucceeds) {
+    JsonSampleRepository repo(testFilePath);
+    repo.add({"S-001", "테스트", 0.5, 0.9, 50});
+
+    EXPECT_TRUE(repo.decreaseStock("S-001", 50));
+
+    auto result = repo.findById("S-001");
+    ASSERT_TRUE(result.has_value());
+    EXPECT_EQ(result->stock, 0);
+}
+
+// 0 수량 차감 → 성공, 재고 변화 없음 (경계값)
+TEST_F(JsonSampleRepositoryTest, DecreaseStockByZeroAmountSucceeds) {
+    JsonSampleRepository repo(testFilePath);
+    repo.add({"S-001", "테스트", 0.5, 0.9, 30});
+
+    EXPECT_TRUE(repo.decreaseStock("S-001", 0));
+
+    auto result = repo.findById("S-001");
+    ASSERT_TRUE(result.has_value());
+    EXPECT_EQ(result->stock, 30);
 }

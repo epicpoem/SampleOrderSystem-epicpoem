@@ -199,3 +199,84 @@ TEST_F(SampleControllerTest, SearchWithInvalidCriteriaShowsError) {
     EXPECT_CALL(view, showInvalidInput()).Times(1);
     ctrl.run();
 }
+
+// ─── Negative / Edge-case TCs ─────────────────────────────────────────────
+
+// 음수 평균생산시간 입력 → 오류 메시지 후 재입력 허용
+TEST_F(SampleControllerTest, NegativeAvgTimeShowsOutOfRangeAndRetries) {
+    NiceMock<MockSampleView> view;
+    std::istringstream in("1\nS-001\nTest\n-5.0\n0.5\n0.9\n0\n");
+    SampleController ctrl(in, view, repo);
+
+    EXPECT_CALL(view, showTimeOutOfRange()).Times(1);
+    EXPECT_CALL(view, showRegisterSuccess(_)).Times(1);
+    ctrl.run();
+    EXPECT_TRUE(repo.exists("S-001"));
+}
+
+// 수율 정확히 0.0 → 경계값, 범위 밖으로 처리되어야 함 (yield <= 0.0)
+TEST_F(SampleControllerTest, YieldExactlyZeroShowsOutOfRangeError) {
+    NiceMock<MockSampleView> view;
+    std::istringstream in("1\nS-001\nTest\n0.5\n0.0\n0\n");
+    SampleController ctrl(in, view, repo);
+
+    EXPECT_CALL(view, showYieldOutOfRange()).Times(1);
+    ctrl.run();
+    EXPECT_FALSE(repo.exists("S-001"));
+}
+
+// 수율 정확히 1.0 → 경계값, 등록 성공해야 함 (yield > 1.0 조건 불만족)
+TEST_F(SampleControllerTest, YieldExactlyOneSucceeds) {
+    NiceMock<MockSampleView> view;
+    std::istringstream in("1\nS-001\nTest\n0.5\n1.0\n0\n");
+    SampleController ctrl(in, view, repo);
+
+    EXPECT_CALL(view, showRegisterSuccess(_)).Times(1);
+    ctrl.run();
+    EXPECT_TRUE(repo.exists("S-001"));
+}
+
+// 빈 ID 입력 → 재입력 루프 (빈 입력 무시 후 유효 ID 수락)
+TEST_F(SampleControllerTest, EmptyIdRepromptsUntilValidIdEntered) {
+    NiceMock<MockSampleView> view;
+    std::istringstream in("1\n\n\nS-001\nTest\n0.5\n0.9\n0\n");
+    SampleController ctrl(in, view, repo);
+
+    EXPECT_CALL(view, showRegisterSuccess(_)).Times(1);
+    ctrl.run();
+    EXPECT_TRUE(repo.exists("S-001"));
+}
+
+// 비숫자 평균생산시간 입력 → stod 예외 → 0.0 처리 → 오류 메시지 후 재입력
+TEST_F(SampleControllerTest, NonNumericAvgTimeTriggersRetryAndOutOfRangeError) {
+    NiceMock<MockSampleView> view;
+    std::istringstream in("1\nS-001\nTest\nabc\n0.5\n0.9\n0\n");
+    SampleController ctrl(in, view, repo);
+
+    EXPECT_CALL(view, showTimeOutOfRange()).Times(1);
+    EXPECT_CALL(view, showRegisterSuccess(_)).Times(1);
+    ctrl.run();
+    EXPECT_TRUE(repo.exists("S-001"));
+}
+
+// 비숫자 수율 입력 → stod 예외 → 0.0 처리 → 범위 오류 (yield <= 0.0)
+TEST_F(SampleControllerTest, NonNumericYieldShowsOutOfRangeError) {
+    NiceMock<MockSampleView> view;
+    std::istringstream in("1\nS-001\nTest\n0.5\nxyz\n0\n");
+    SampleController ctrl(in, view, repo);
+
+    EXPECT_CALL(view, showYieldOutOfRange()).Times(1);
+    ctrl.run();
+    EXPECT_FALSE(repo.exists("S-001"));
+}
+
+// 수율 임계값보다 낮은 시료만 존재할 때 수율 검색 → 결과 없음
+TEST_F(SampleControllerTest, SearchByYieldWithHighThresholdShowsNoResults) {
+    repo.add({"S-001", "저수율 시료", 0.5, 0.5, 0});
+    NiceMock<MockSampleView> view;
+    std::istringstream in("3\n3\n0.9\n0\n");
+    SampleController ctrl(in, view, repo);
+
+    EXPECT_CALL(view, showNoResults()).Times(1);
+    ctrl.run();
+}
