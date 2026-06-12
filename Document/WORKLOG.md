@@ -198,3 +198,39 @@
 
 ### 다음 작업 지시
 - Feature-02 구현 지시
+---
+
+## [2026-06-12] Feature-02 시료 주문 구현
+
+### 작업 내용
+- `util/FakeClock.h` 신규 생성: 테스트용 시간 고정 구현체 (IClock 인터페이스 준수)
+- `view/IOrderView.h` 신규 생성: 주문 뷰 인터페이스 (Y/N 확인 메서드 포함)
+- `view/OrderView.h/.cpp` 신규 생성: 콘솔 출력 구현 (ostream 주입으로 테스트 가능)
+- `controller/OrderController.h/.cpp` 신규 생성
+  - 시료 ID 유효성 검증 (미등록 ID → 재입력 루프)
+  - 수량 유효성 검증 (0 이하, 비숫자 → 재입력 루프)
+  - Y/N 확인 단계 포함 (N/n → 취소)
+  - IClock 주입으로 주문번호 날짜 채번 (ORD-YYYYMMDD-XXXX)
+- `main.cpp`: Feature-02 연결 (orderCtrl.run() 호출)
+- `unit/OrderControllerTest.cpp` 신규 생성: 11개 테스트 (FakeClock 활용)
+  - 정상 주문, Y/N 취소, 잘못된 시료ID, 0/음수/비숫자 수량, 빈 ID 루프, 당일 순번 증가
+
+### 커밋
+- `a399263` [AI-Feature] Feature-02 시료 주문 구현 (OrderController/View/FakeClock)
+
+### 리뷰 요청
+- 빌드 및 테스트 49/49 통과 확인되었습니다.
+- Visual Studio에서 실행하여 [2] 시료 주문 기능 동작 확인 부탁드립니다.
+  - 시료 등록(1번 메뉴) → 시료 주문(2번 메뉴) → 주문번호 ORD-YYYYMMDD-0001 생성 확인
+  - 프로그램 재시작 후 두 번째 주문 시 ORD-YYYYMMDD-0002 순번 증가 확인
+- 이상 없으면 Feature-03(주문 승인/거절) 진행 지시 부탁드립니다.
+
+---
+### 리뷰 (by User)
+- orders.json에 주문 추가 되는 것 확인
+- 모니터링이 구현되지 않아 프로그램 내 확인은 불가
+- 주문 순번 증가 확인
+- 구현 코드 확인
+
+### 다음 작업 지시
+- 시료 주문중 취소하는 방법 필요 (빈 str 입력시 시료 주문을 취소하겠습니까 출력 등)
