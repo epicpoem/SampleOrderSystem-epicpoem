@@ -152,6 +152,12 @@ data/
 - Visual Studio 2022 (MSVC)
 - Windows 10/11 (x64)
 
+### 사전 빌드 실행 파일 (교육 제출용)
+
+> `bin/SampleOrderSystem.exe` — 별도 빌드 없이 바로 실행 가능한 Windows x64 정적 빌드(Static Link)입니다.
+> MSVC 런타임 DLL(vcruntime140.dll 등)이 정적 링크되어 있어 **VC++ 재배포 패키지 설치 없이** 실행됩니다.
+> 교육과정 제출 평가 목적으로 함께 포함되었습니다.
+
 ### 빌드 및 실행
 
 1. `SampleOrderSystem/SampleOrderSystem.slnx` 를 Visual Studio에서 열기
