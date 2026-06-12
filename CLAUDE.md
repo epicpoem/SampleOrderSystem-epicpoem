@@ -107,8 +107,8 @@ data/           # JSON 저장 파일
 ## 평가 기준 (미션2)
 
 1. **CLAUDE.md, PRD.md** 등 문서 관리
-2. **Harness** 도입
-3. **Test**: 단위 테스트 / 통합 테스트 (MockClock 활용)
+2. **Harness** 도입: gmock/gtest 기반 테스트 하네스, ctest로 일괄 실행 가능
+3. **Test**: 단위 테스트(unit/) + 통합 테스트(integration/), MockClock 활용
 4. **CleanCode**: 명확한 네이밍, 단일 책임, 불필요 주석 없음
 5. **Commit 이력**: 의미있는 메시지, 기능 단위 커밋
 
@@ -124,6 +124,36 @@ data/           # JSON 저장 파일
 - [ ] 단위/통합 테스트 존재
 - [ ] CLAUDE.md, PRD.md 존재
 - [ ] 의미있는 커밋 이력
+
+---
+
+## 개발 환경 및 테스트 정책
+
+### 개발 언어
+- **C++** (C++17 이상 권장)
+- 빌드 시스템: CMake 사용 권장
+
+### 테스트 프레임워크
+- **Google Mock (gmock) / Google Test (gtest)**
+- CMakeLists.txt에 테스트 타겟을 별도 구성
+- 테스트 파일 위치: `test/` 디렉토리
+
+### 테스트 하네스 (Harness)
+- gmock/gtest 기반 테스트 하네스를 프로젝트 초기에 구성한다.
+- 모든 테스트가 `ctest` 또는 단일 실행파일로 일괄 실행 가능해야 한다.
+- Mock 객체 활용: `MockClock`, `MockRepository` 등 의존성 주입 방식으로 격리 테스트
+- 단위 테스트(Unit)와 통합 테스트(Integration)를 디렉토리로 구분 권장
+  ```
+  test/
+    unit/        # 개별 클래스/함수 단위 테스트
+    integration/ # 여러 컴포넌트 연동 테스트 (MockClock 활용)
+  ```
+
+### 테스트 정책
+- TDD(Test-Driven Development)는 강제하지 않는다.
+- 단, 구현한 **각 기능에 대해 반드시 테스트 코드를 작성**한다.
+- 기능 구현 커밋(`[AI-Feature]`) 이후 테스트 커밋(`[AI-Test]`)을 함께 남긴다.
+- 최소 기준: 정상 동작 케이스 + 경계값/예외 케이스 각 1개 이상
 
 ---
 
