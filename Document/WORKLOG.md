@@ -382,3 +382,38 @@
 ### 다음 작업 지시
 - 유사한 기능인 Feature-04와 Feature-05 동시 구현 
 - PoC 프로젝트 중 DataMonitor 구현 참조하여 개발
+
+## [2026-06-12] Feature-04 모니터링 + Feature-05 생산라인 조회 구현
+
+### 작업 내용
+- `MonitorController` / `MonitorView` / `IMonitorView` 신규 구현 (Feature-04)
+  - 주문 상태별 수 집계 (RESERVED/CONFIRMED/PRODUCING/RELEASE), REJECTED 제외
+  - 시료별 재고 상태: CONFIRMED+PRODUCING 주문량 합산 vs stock 비교 → 여유/부족/고갈
+  - 메뉴 진입 시 생산 완료 자동 감지 표시
+- `ProductionController` / `ProductionView` / `IProductionView` 신규 구현 (Feature-05)
+  - FIFO 큐: PRODUCING 주문을 productionStartTime 오름차순 정렬, 첫 번째가 현재 생산 중
+  - 진행률(%), 잔여시간(min) 실시간 계산 표시
+  - 대기 큐: 순서/주문번호/시료명/잔여시간 표 형식 출력
+- `StockService.checkAndCompleteProduction()`: `totalProductionTimeMin <= 0.0` 방어 가드 추가
+- `main.cpp`: 메뉴 [4] 모니터링, [5] 생산라인 조회 연결
+- 테스트: 3건 실패 수정 후 **108/108 전부 통과**
+  - `OrderStatsCountedCorrectly`: PRODUCING 테스트 주문에 `totalProdTimeMin=999` 설정
+  - `StockStatusDepleted`: S-001/"여유" + S-002/"고갈" 양쪽 EXPECT_CALL 명시
+  - `ProgressCapped → ElapsedExceedsTotal`: elapsed >= total 시 CONFIRMED 전환 동작 검증으로 변경
+
+### 커밋
+- `6f9550b` [AI-Feature] Feature-04/05 모니터링 및 생산라인 조회 구현
+- `339bd1d` [AI-Test] Feature-04/05 MonitorController 및 ProductionController 테스트 추가
+
+### 리뷰 요청
+- [4] 모니터링 메뉴: 상태별 주문 수 및 재고 상태(여유/부족/고갈) 표시 정상 동작 확인 요청
+- [5] 생산라인 조회 메뉴: FIFO 순서, 진행률, 잔여시간 표시 정상 동작 확인 요청
+- PRODUCING 주문이 완료 시간 경과 후 메뉴 진입 시 자동으로 CONFIRMED 전환 동작 확인 요청
+- 이상 없으면 Feature-06(출고 처리) 구현 지시 부탁드립니다.
+
+---
+### 리뷰 (by User)
+-
+
+### 다음 작업 지시
+-
