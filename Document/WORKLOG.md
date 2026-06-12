@@ -459,3 +459,50 @@
    → Monitoring 실행할때마다 Production 중인 수량은 생산된 량만큼 물리적 재고/화면에 실시간 업데이트
 - Feature 4. 모니터링에서 잔여율 그래프 있어야 함. feature 스펙에 추가
 - Feature 6에 대해 Negative TC 추가 및 테스트
+
+---
+
+## [2026-06-12] Feature-04 물리적 재고 실시간 반영 및 잔여율 그래프, Feature-06 Negative TC
+
+### 작업 내용
+
+**Feature-04 모니터링 물리적 재고 실시간 반영**
+- `IMonitorView::showStockRow`: `double physStock` 파라미터 추가 (3인자 → 4인자)
+- `MonitorController`: `s.stock` 대신 `stockService_.calcPhysicalStock(s)` 사용
+  - PRODUCING 주문 진행분 비례 생산량이 재고 판단에 실시간 반영됨
+  - 상태 판단 기준: `physStock <= 0 → 고갈`, `physStock >= totalQty → 여유`, else `부족`
+- `MonitorView::showStockRow`: 물리적 재고(실시간) 표시 + 잔여율 막대 그래프 추가
+
+**Feature-04 잔여율 막대 그래프**
+- 10칸 막대 그래프: █ (채움) / ░ (비움), 1칸 = 10%
+- `잔여율 = min(100, physStock / CONFIRMED+PRODUCING 주문량 * 100)`, 주문량=0이면 100%
+- `FEATURE-04-monitoring.md`: 물리적 재고 정책 및 잔여율 그래프 섹션 추가
+
+**Feature-06 Negative TC 추가**
+- `ReservedOrderNotShownInReleaseList`: RESERVED 주문만 있을 때 출고 목록 비어 있어야 함
+- `ProducingOrderNotShownInReleaseList`: PRODUCING 주문만 있을 때 (아직 완료 안 됨) 비어야 함
+- `ReleasedOrderNotShownInReleaseList`: 이미 RELEASE된 주문은 목록에 미노출
+- `StockExactlyZeroAfterRelease`: stock=qty 출고 시 재고가 정확히 0이 되는 경계값 테스트
+
+**MonitorControllerTest 업데이트**
+- mock `showStockRow` 시그니처: 3인자 → 4인자
+- 기존 EXPECT_CALL 전체를 `(_, _, totalQty, status)` 형식으로 변경
+- `PhysicalStockFromProducingProgressIsReflected` TC 추가
+
+### 커밋
+- `96bb644` [AI-Feature] Feature-04 모니터링: 물리적 재고 실시간 반영 및 잔여율 그래프 추가
+- `7cd7c83` [AI-Test] Feature-04/06 테스트 업데이트: physStock 파라미터 반영 및 Negative TC 추가
+
+### 리뷰 요청
+- 130/130 전체 통과 확인
+- 모니터링 화면([4])에서 PRODUCING 주문이 있을 때 물리적 재고가 진행분 비례로 표시되는지 확인 요청
+  - 예) stock=0, PRODUCING actualProd=100 중 50% 진행 → 물리적재고 50.00 ea 표시
+- 잔여율 그래프 막대([██████░░░░] 60%) 출력 형식 확인 요청
+- Feature-06 Negative TC: RESERVED/PRODUCING/RELEASE 주문이 출고 목록에 노출되지 않는지 확인 요청
+
+---
+### 리뷰 (by User)
+-
+
+### 다음 작업 지시
+-
