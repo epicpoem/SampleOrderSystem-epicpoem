@@ -148,8 +148,10 @@
     <ClCompile Include="repository\JsonOrderRepository.cpp" />
     <ClCompile Include="view\SampleView.cpp" />
     <ClCompile Include="view\OrderView.cpp" />
+    <ClCompile Include="view\ApprovalView.cpp" />
     <ClCompile Include="controller\SampleController.cpp" />
     <ClCompile Include="controller\OrderController.cpp" />
+    <ClCompile Include="controller\ApprovalController.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="model\Sample.h" />
@@ -166,9 +168,12 @@
     <ClInclude Include="view\SampleView.h" />
     <ClInclude Include="view\IOrderView.h" />
     <ClInclude Include="view\OrderView.h" />
+    <ClInclude Include="view\IApprovalView.h" />
+    <ClInclude Include="view\ApprovalView.h" />
     <ClInclude Include="controller\IController.h" />
     <ClInclude Include="controller\SampleController.h" />
     <ClInclude Include="controller\OrderController.h" />
+    <ClInclude Include="controller\ApprovalController.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
