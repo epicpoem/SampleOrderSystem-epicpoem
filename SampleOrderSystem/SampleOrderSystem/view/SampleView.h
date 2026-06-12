@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "ISampleView.h"
+#include <iostream>
 #include <ostream>
 
 class SampleView : public ISampleView {
