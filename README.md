@@ -339,4 +339,4 @@ SampleOrderSystem/x64/Debug/SampleOrderSystemTest.exe
 | FEATURE-06 | `Document/FEATURES/FEATURE-06-release.md` | 출고 처리 |
 | WORKLOG | `Document/WORKLOG.md` | 개발 이력 및 리뷰 기록 |
 <!-- 교육과정 내 개인 프로젝트이기에, AI 활용 이력 / Harness 도입 / 테스트 적용 / 클린 코드 수행 증빙 목적으로 WORKLOG.md를 여기에 제출합니다 -->
-| 스펙 원본 | `../Document/spec/` | 원본 PDF 및 정제 스펙 |
+| 스펙 원본 | `Document/spec/` | 원본 PDF 및 정제 스펙 |
