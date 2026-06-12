@@ -265,3 +265,34 @@
 
 ### 다음 작업 지시
 - NegativeTC 추가 및 테스트
+
+---
+
+## [2026-06-12] Negative TC 추가 (Feature-02 OrderController + JsonOrderRepository)
+
+### 작업 내용
+- `OrderControllerTest.cpp`에 5개 Negative/Edge-case TC 추가
+  - `QuantityExactlyOneSucceeds`: 수량 최솟값 1 경계값 → 성공
+  - `MultipleInvalidSampleIdsBeforeValidSucceeds`: 잘못된 시료 ID 복수 입력 후 유효 ID → 성공
+  - `MultipleInvalidQuantitiesBeforeValidSucceeds`: 0, 음수, 비숫자 연속 입력 후 유효 수량 → 성공
+  - `CancelConfirmWithNonYNInputTreatedAsNo`: 취소 확인에 Y/N 외 입력 → 취소 안 됨 (재입력)
+  - `FinalConfirmWithEmptyInputCancels`: 최종 확인에 빈 입력 → 취소 처리
+- `JsonOrderRepositoryTest.cpp` 신규 생성: 14개 테스트
+  - CRUD: add/findAll, findByNo, findByStatus, update, 영속성
+  - 주문번호 채번: 첫 주문 0001, 동일날 순번 증가, 다른 날짜 독립
+  - Negative: 파일 없음, 손상된 JSON, 빈 저장소 상태 조회, 전체 상태 타입 저장/조회
+
+### 커밋
+- `d020f15` [AI-Test] Negative TC 추가 - OrderController 경계값/연속오류/취소확인, JsonOrderRepository 전체 검증 (72/72 PASS)
+
+### 리뷰 요청
+- 기존 53개 + 신규 19개 = 총 72개 테스트 전부 PASS 확인되었습니다.
+- TC 항목 및 커버리지 수준 확인 부탁드립니다.
+- 이상 없으면 Feature-03(주문 승인/거절) 구현 진행 지시 부탁드립니다.
+
+---
+### 리뷰 (by User)
+- NegativeTC 확인, 커버리지 확인. 이견 없음
+
+### 다음 작업 지시
+- Feature-03 구현 진행
