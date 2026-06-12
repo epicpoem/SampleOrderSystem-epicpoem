@@ -427,3 +427,6 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# Distribute static-linked release binary
+!bin/SampleOrderSystem.exe
