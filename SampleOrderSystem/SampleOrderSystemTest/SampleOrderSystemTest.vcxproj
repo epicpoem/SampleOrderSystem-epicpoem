@@ -146,6 +146,7 @@
     <ClCompile Include="..\SampleOrderSystem\controller\OrderController.cpp" />
     <ClCompile Include="..\SampleOrderSystem\view\ApprovalView.cpp" />
     <ClCompile Include="..\SampleOrderSystem\controller\ApprovalController.cpp" />
+    <ClCompile Include="..\SampleOrderSystem\service\StockService.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

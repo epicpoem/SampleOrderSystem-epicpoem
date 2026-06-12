@@ -1,53 +1,15 @@
 ﻿#include "ApprovalController.h"
 #include <string>
 #include <cmath>
-#include <algorithm>
 
 ApprovalController::ApprovalController(std::istream& in, IApprovalView& view,
-                                        ISampleRepository& sampleRepo,
-                                        IOrderRepository& orderRepo,
-                                        IClock& clock)
-    : in_(in), view_(view), sampleRepo_(sampleRepo),
-      orderRepo_(orderRepo), clock_(clock) {}
-
-void ApprovalController::checkAndCompleteProduction() {
-    std::time_t now = clock_.now();
-    for (const auto& o : orderRepo_.findAll()) {
-        if (o.status != OrderStatus::PRODUCING) continue;
-        double elapsedMin = std::difftime(now, o.productionStartTime) / 60.0;
-        if (elapsedMin >= o.totalProductionTimeMin) {
-            Order completed = o;
-            completed.status = OrderStatus::CONFIRMED;
-            orderRepo_.update(completed);
-
-            auto sampleOpt = sampleRepo_.findById(o.sampleId);
-            if (sampleOpt.has_value()) {
-                Sample updated = *sampleOpt;
-                updated.stock += o.actualProduction;
-                sampleRepo_.update(updated);
-            }
-
-            view_.showProductionCompleted(o.orderNo);
-        }
-    }
-}
-
-double ApprovalController::calcPhysicalStock(const Sample& sample) {
-    double physStock = sample.stock;
-    std::time_t now = clock_.now();
-    for (const auto& o : orderRepo_.findAll()) {
-        if (o.status != OrderStatus::PRODUCING) continue;
-        if (o.sampleId != sample.id) continue;
-        if (o.totalProductionTimeMin <= 0.0) continue;
-        double elapsedMin = std::difftime(now, o.productionStartTime) / 60.0;
-        double ratio = std::min(1.0, elapsedMin / o.totalProductionTimeMin);
-        physStock += o.actualProduction * ratio;
-    }
-    return physStock;
-}
+                                       IOrderRepository& orderRepo,
+                                       StockService& stockService)
+    : in_(in), view_(view), orderRepo_(orderRepo), stockService_(stockService) {}
 
 void ApprovalController::run() {
-    checkAndCompleteProduction();
+    for (const auto& orderNo : stockService_.checkAndCompleteProduction())
+        view_.showProductionCompleted(orderNo);
 
     auto reserved = orderRepo_.findByStatus(OrderStatus::RESERVED);
     if (reserved.empty()) {
@@ -71,14 +33,14 @@ void ApprovalController::run() {
     }
 
     const Order& order = reserved[idx];
-    auto sampleOpt = sampleRepo_.findById(order.sampleId);
+    auto sampleOpt = stockService_.findSampleById(order.sampleId);
     if (!sampleOpt.has_value()) {
         view_.showOrderNotFound();
         return;
     }
     const Sample& sample = *sampleOpt;
 
-    double physStock = calcPhysicalStock(sample);
+    double physStock = stockService_.calcPhysicalStock(sample);
     bool sufficient = (physStock >= order.quantity);
 
     if (sufficient) {
@@ -109,7 +71,7 @@ void ApprovalController::run() {
             updated.status = OrderStatus::PRODUCING;
             updated.actualProduction = actualProd;
             updated.totalProductionTimeMin = totalProdTime;
-            updated.productionStartTime = clock_.now();
+            updated.productionStartTime = stockService_.now();
             orderRepo_.update(updated);
             view_.showApprovedAsProducing(updated);
         }

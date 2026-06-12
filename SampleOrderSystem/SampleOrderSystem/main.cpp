@@ -5,18 +5,21 @@
 #include "controller/ApprovalController.h"
 #include "repository/JsonSampleRepository.h"
 #include "repository/JsonOrderRepository.h"
+#include "service/StockService.h"
 #include "view/SampleView.h"
 #include "view/OrderView.h"
 #include "view/ApprovalView.h"
 #include "util/SystemClock.h"
 
-static void showMainMenu(const JsonSampleRepository& sampleRepo,
-                         const JsonOrderRepository& orderRepo) {
+static void showMainMenu(JsonSampleRepository& sampleRepo,
+                         const JsonOrderRepository& orderRepo,
+                         StockService& stockService) {
     auto samples = sampleRepo.findAll();
     auto orders  = orderRepo.findAll();
 
-    int totalStock = 0;
-    for (const auto& s : samples) totalStock += s.stock;
+    double totalPhysStock = 0.0;
+    for (const auto& s : samples)
+        totalPhysStock += stockService.calcPhysicalStock(s);
 
     int producingCount = 0;
     for (const auto& o : orders)
@@ -26,7 +29,7 @@ static void showMainMenu(const JsonSampleRepository& sampleRepo,
     std::cout << "        반도체 시료 생산주문관리 시스템  (S-Semi)\n";
     std::cout << "===================================================================\n";
     std::cout << "  등록 시료  " << samples.size() << "종"
-              << "       총 재고    " << totalStock << " ea\n";
+              << "       총 재고    " << (long long)totalPhysStock << " ea\n";
     std::cout << "  전체 주문  " << orders.size() << "건"
               << "       생산라인   " << producingCount << "건 대기\n";
     std::cout << "-------------------------------------------------------------------\n";
@@ -45,6 +48,7 @@ int main() {
     JsonSampleRepository sampleRepo("data/samples.json");
     JsonOrderRepository  orderRepo("data/orders.json");
     SystemClock          clock;
+    StockService         stockService(sampleRepo, orderRepo, clock);
 
     SampleView       sampleView;
     SampleController sampleCtrl(std::cin, sampleView, sampleRepo);
@@ -52,11 +56,14 @@ int main() {
     OrderView        orderView;
     OrderController  orderCtrl(std::cin, orderView, sampleRepo, orderRepo, clock);
 
-    ApprovalView     approvalView;
-    ApprovalController approvalCtrl(std::cin, approvalView, sampleRepo, orderRepo, clock);
+    ApprovalView       approvalView;
+    ApprovalController approvalCtrl(std::cin, approvalView, orderRepo, stockService);
 
     while (true) {
-        showMainMenu(sampleRepo, orderRepo);
+        for (const auto& no : stockService.checkAndCompleteProduction())
+            std::cout << "[생산완료] " << no << " \xE2\x86\x92 CONFIRMED\n";
+
+        showMainMenu(sampleRepo, orderRepo, stockService);
 
         std::string line;
         if (!std::getline(std::cin, line)) break;

@@ -6,6 +6,7 @@
 #include "SampleOrderSystem/view/IApprovalView.h"
 #include "SampleOrderSystem/repository/ISampleRepository.h"
 #include "SampleOrderSystem/repository/IOrderRepository.h"
+#include "SampleOrderSystem/service/StockService.h"
 #include "SampleOrderSystem/util/FakeClock.h"
 
 using ::testing::_;
@@ -111,6 +112,7 @@ protected:
     ApprSampleRepo sampleRepo;
     ApprOrderRepo  orderRepo;
     FakeClock      clock{0, "20260612"};
+    StockService   stockService{sampleRepo, orderRepo, clock};
 
     void SetUp() override {
         // 기본 시료: yield=0.9, avgProdTime=1.0 min/ea, stock=100
@@ -123,7 +125,7 @@ protected:
 TEST_F(ApprovalControllerTest, NoReservedOrdersShowsEmptyMessage) {
     NiceMock<MockApprovalView> view;
     std::istringstream in("");
-    ApprovalController ctrl(in, view, sampleRepo, orderRepo, clock);
+    ApprovalController ctrl(in, view, orderRepo, stockService);
 
     EXPECT_CALL(view, showNoReservedOrders()).Times(1);
     ctrl.run();
@@ -134,7 +136,7 @@ TEST_F(ApprovalControllerTest, ApproveWithSufficientStockBecomesConfirmed) {
     NiceMock<MockApprovalView> view;
     // stock=100 >= qty=50 → sufficient
     std::istringstream in("1\nY\n");
-    ApprovalController ctrl(in, view, sampleRepo, orderRepo, clock);
+    ApprovalController ctrl(in, view, orderRepo, stockService);
 
     EXPECT_CALL(view, showStockSufficient(_, _)).Times(1);
     EXPECT_CALL(view, showApprovedAsConfirmed(_)).Times(1);
@@ -150,7 +152,7 @@ TEST_F(ApprovalControllerTest, ApproveWithInsufficientStockBecomesProducing) {
     NiceMock<MockApprovalView> view;
     // stock=100 < qty=200 → insufficient
     std::istringstream in("1\nY\n");
-    ApprovalController ctrl(in, view, sampleRepo, orderRepo, clock);
+    ApprovalController ctrl(in, view, orderRepo, stockService);
 
     EXPECT_CALL(view, showStockInsufficient(_, _, _, _, _)).Times(1);
     EXPECT_CALL(view, showApprovedAsProducing(_)).Times(1);
@@ -167,7 +169,7 @@ TEST_F(ApprovalControllerTest, RejectSufficientStockBecomesRejected) {
     orderRepo.add(makeReserved("ORD-20260612-0001", "S-001", "고객A", 50));
     NiceMock<MockApprovalView> view;
     std::istringstream in("1\nN\n");
-    ApprovalController ctrl(in, view, sampleRepo, orderRepo, clock);
+    ApprovalController ctrl(in, view, orderRepo, stockService);
 
     EXPECT_CALL(view, showRejected(_)).Times(1);
     ctrl.run();
@@ -181,7 +183,7 @@ TEST_F(ApprovalControllerTest, RejectInsufficientStockBecomesRejected) {
     orderRepo.add(makeReserved("ORD-20260612-0001", "S-001", "고객A", 200));
     NiceMock<MockApprovalView> view;
     std::istringstream in("1\nN\n");
-    ApprovalController ctrl(in, view, sampleRepo, orderRepo, clock);
+    ApprovalController ctrl(in, view, orderRepo, stockService);
 
     EXPECT_CALL(view, showRejected(_)).Times(1);
     ctrl.run();
@@ -195,7 +197,7 @@ TEST_F(ApprovalControllerTest, InputZeroReturnsWithoutAction) {
     orderRepo.add(makeReserved("ORD-20260612-0001", "S-001", "고객A", 50));
     NiceMock<MockApprovalView> view;
     std::istringstream in("0\n");
-    ApprovalController ctrl(in, view, sampleRepo, orderRepo, clock);
+    ApprovalController ctrl(in, view, orderRepo, stockService);
 
     EXPECT_CALL(view, showApprovePrompt()).Times(0);
     ctrl.run();
@@ -209,7 +211,7 @@ TEST_F(ApprovalControllerTest, InvalidIndexShowsOrderNotFound) {
     orderRepo.add(makeReserved("ORD-20260612-0001", "S-001", "고객A", 50));
     NiceMock<MockApprovalView> view;
     std::istringstream in("99\n");
-    ApprovalController ctrl(in, view, sampleRepo, orderRepo, clock);
+    ApprovalController ctrl(in, view, orderRepo, stockService);
 
     EXPECT_CALL(view, showOrderNotFound()).Times(1);
     ctrl.run();
@@ -235,7 +237,7 @@ TEST_F(ApprovalControllerTest, ProductionCompletedOnMenuEntry) {
 
     NiceMock<MockApprovalView> view;
     std::istringstream in("");
-    ApprovalController ctrl(in, view, sampleRepo, orderRepo, clock);
+    ApprovalController ctrl(in, view, orderRepo, stockService);
 
     EXPECT_CALL(view, showProductionCompleted(_)).Times(1);
     ctrl.run();
@@ -262,7 +264,7 @@ TEST_F(ApprovalControllerTest, ProductionNotCompletedWhenElapsedInsufficient) {
 
     NiceMock<MockApprovalView> view;
     std::istringstream in("");
-    ApprovalController ctrl(in, view, sampleRepo, orderRepo, clock);
+    ApprovalController ctrl(in, view, orderRepo, stockService);
 
     EXPECT_CALL(view, showProductionCompleted(_)).Times(0);
     ctrl.run();
@@ -297,7 +299,7 @@ TEST_F(ApprovalControllerTest, PhysicalStockIncludesProducingProgress) {
 
     NiceMock<MockApprovalView> view;
     std::istringstream in("1\nY\n");
-    ApprovalController ctrl(in, view, sampleRepo, orderRepo, clock);
+    ApprovalController ctrl(in, view, orderRepo, stockService);
 
     EXPECT_CALL(view, showStockSufficient(_, _)).Times(1);
     EXPECT_CALL(view, showApprovedAsConfirmed(_)).Times(1);
@@ -326,7 +328,7 @@ TEST_F(ApprovalControllerTest, PhysicalStockWithFullyCompletedProducingIsCapped)
 
     NiceMock<MockApprovalView> view;
     std::istringstream in("1\nY\n");
-    ApprovalController ctrl(in, view, sampleRepo, orderRepo, clock);
+    ApprovalController ctrl(in, view, orderRepo, stockService);
 
     EXPECT_CALL(view, showStockSufficient(_, _)).Times(1);
     ctrl.run();
@@ -343,7 +345,7 @@ TEST_F(ApprovalControllerTest, ProductionQuantityCalculationIsCorrect) {
 
     NiceMock<MockApprovalView> view;
     std::istringstream in("1\nY\n");
-    ApprovalController ctrl(in, view, sampleRepo, orderRepo, clock);
+    ApprovalController ctrl(in, view, orderRepo, stockService);
     ctrl.run();
 
     auto updated = orderRepo.findByNo("ORD-20260612-0001");
@@ -361,7 +363,7 @@ TEST_F(ApprovalControllerTest, ExactlyEqualStockBecomesConfirmed) {
     orderRepo.add(makeReserved("ORD-20260612-0001", "S-001", "고객A", 100));
     NiceMock<MockApprovalView> view;
     std::istringstream in("1\nY\n");
-    ApprovalController ctrl(in, view, sampleRepo, orderRepo, clock);
+    ApprovalController ctrl(in, view, orderRepo, stockService);
 
     EXPECT_CALL(view, showStockSufficient(_, _)).Times(1);
     EXPECT_CALL(view, showApprovedAsConfirmed(_)).Times(1);
@@ -372,7 +374,7 @@ TEST_F(ApprovalControllerTest, NonNumericIndexShowsOrderNotFound) {
     orderRepo.add(makeReserved("ORD-20260612-0001", "S-001", "고객A", 50));
     NiceMock<MockApprovalView> view;
     std::istringstream in("abc\n");
-    ApprovalController ctrl(in, view, sampleRepo, orderRepo, clock);
+    ApprovalController ctrl(in, view, orderRepo, stockService);
 
     EXPECT_CALL(view, showOrderNotFound()).Times(1);
     ctrl.run();
@@ -383,7 +385,7 @@ TEST_F(ApprovalControllerTest, MultipleReservedOrdersPickSecond) {
     orderRepo.add(makeReserved("ORD-20260612-0002", "S-001", "고객B", 30));
     NiceMock<MockApprovalView> view;
     std::istringstream in("2\nY\n");
-    ApprovalController ctrl(in, view, sampleRepo, orderRepo, clock);
+    ApprovalController ctrl(in, view, orderRepo, stockService);
 
     EXPECT_CALL(view, showApprovedAsConfirmed(_)).Times(1);
     ctrl.run();
