@@ -413,7 +413,9 @@
 
 ---
 ### 리뷰 (by User)
--
+- Feature 6 구현 중 리뷰/테스트 진행 예정
+- 리뷰/테스트 의견 발생시 다음 Worklog에 작성
 
 ### 다음 작업 지시
--
+- Feature 3,4,5 Negative TC 추가 후 테스트
+- 테스트 성공시 Feature 6 구현 지시
