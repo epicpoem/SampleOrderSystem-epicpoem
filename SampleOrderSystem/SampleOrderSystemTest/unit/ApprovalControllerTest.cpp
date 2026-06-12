@@ -393,3 +393,56 @@ TEST_F(ApprovalControllerTest, MultipleReservedOrdersPickSecond) {
     EXPECT_EQ(orderRepo.findByNo("ORD-20260612-0001")->status, OrderStatus::RESERVED);
     EXPECT_EQ(orderRepo.findByNo("ORD-20260612-0002")->status, OrderStatus::CONFIRMED);
 }
+
+// ── 소수점 avgTime 생산시간 계산 ───────────────────────────────────────────
+
+TEST_F(ApprovalControllerTest, SmallDecimalAvgTimeProductionTimeIsCorrect) {
+    // avgTime=0.05 min/ea, stock=0, qty=110
+    // shortage=110, actualProd = ceil(110 / (0.9*0.9)) = ceil(135.8) = 136
+    // totalProdTime = 0.05 * 136 = 6.8 min
+    sampleRepo.add({"S-003", "소수점 시료", 0.05, 0.9, 0});
+    orderRepo.add(makeReserved("ORD-20260612-0001", "S-003", "고객A", 110));
+
+    NiceMock<MockApprovalView> view;
+    std::istringstream in("1\nY\n");
+    ApprovalController ctrl(in, view, orderRepo, stockService);
+    ctrl.run();
+
+    auto updated = orderRepo.findByNo("ORD-20260612-0001");
+    ASSERT_TRUE(updated.has_value());
+    EXPECT_EQ(updated->status, OrderStatus::PRODUCING);
+    EXPECT_EQ(updated->actualProduction, 136);
+    EXPECT_DOUBLE_EQ(updated->totalProductionTimeMin, 0.05 * 136);
+}
+
+TEST_F(ApprovalControllerTest, SmallDecimalAvgTimeCompletesQuickly) {
+    // avgTime=0.05 min/ea, 생산 완료: elapsed=20초 >= totalProdTime=0.05*10=0.5min=30초
+    // 0.05min = 3초, actualProd=10 → totalProdTimeMin=0.5min → 30초
+    // elapsed=31초 → 완료
+    sampleRepo.add({"S-003", "소수점 시료", 0.05, 0.9, 0});
+
+    Order prod;
+    prod.orderNo                = "ORD-20260611-0001";
+    prod.sampleId               = "S-003";
+    prod.customerName           = "고객B";
+    prod.quantity               = 10;
+    prod.status                 = OrderStatus::PRODUCING;
+    prod.actualProduction       = 10;
+    prod.totalProductionTimeMin = 0.5;   // 0.05 * 10
+    prod.productionStartTime    = 0;
+    orderRepo.add(prod);
+
+    // elapsed=31초 → 31/60=0.5167min >= 0.5min → 완료
+    clock.setNow(31);
+
+    NiceMock<MockApprovalView> view;
+    std::istringstream in("");
+    ApprovalController ctrl(in, view, orderRepo, stockService);
+
+    EXPECT_CALL(view, showProductionCompleted(_)).Times(1);
+    ctrl.run();
+
+    auto updated = orderRepo.findByNo("ORD-20260611-0001");
+    ASSERT_TRUE(updated.has_value());
+    EXPECT_EQ(updated->status, OrderStatus::CONFIRMED);
+}

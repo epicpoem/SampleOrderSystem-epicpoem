@@ -30,7 +30,7 @@ void SampleView::showNamePrompt() {
 }
 
 void SampleView::showTimePrompt() {
-    out_ << "평균 생산시간(min/ea) > ";
+    out_ << "평균 생산시간(min/ea, 소수점 입력 가능) > ";
 }
 
 void SampleView::showYieldPrompt() {
@@ -53,8 +53,8 @@ void SampleView::showRegisterSuccess(const Sample& sample) {
     out_ << "\n[완료] 시료가 등록되었습니다.\n";
     out_ << "  ID: " << sample.id
          << "  이름: " << sample.name
-         << "  평균생산시간: " << sample.avgProductionTime << " min/ea"
-         << "  수율: " << sample.yield << "\n";
+         << "  평균생산시간: " << std::fixed << std::setprecision(4) << sample.avgProductionTime << " min/ea"
+         << "  수율: " << std::defaultfloat << sample.yield << "\n";
 }
 
 void SampleView::showSampleList(const std::vector<Sample>& samples) {
@@ -72,12 +72,12 @@ void SampleView::showSampleList(const std::vector<Sample>& samples) {
     out_ << std::string(68, '-') << "\n";
     for (const auto& s : samples) {
         std::ostringstream timeStr;
-        timeStr << s.avgProductionTime << " min/ea";
+        timeStr << std::fixed << std::setprecision(4) << s.avgProductionTime << " min/ea";
         std::ostringstream stockStr;
         stockStr << s.stock << " ea";
         out_ << std::setw(8)  << s.id
              << std::setw(24) << s.name
-             << std::setw(18) << timeStr.str()
+             << std::setw(21) << timeStr.str()
              << std::setw(8)  << s.yield
              << stockStr.str() << "\n";
     }

@@ -270,6 +270,34 @@ TEST_F(SampleControllerTest, NonNumericYieldShowsOutOfRangeError) {
     EXPECT_FALSE(repo.exists("S-001"));
 }
 
+// 소수점 avgTime 입력 (0.05 min/ea) → 정상 등록
+TEST_F(SampleControllerTest, RegisterSampleWithSmallDecimalAvgTimeSucceeds) {
+    NiceMock<MockSampleView> view;
+    std::istringstream in("1\nS-001\nTest\n0.05\n0.9\n0\n");
+    SampleController ctrl(in, view, repo);
+
+    EXPECT_CALL(view, showRegisterSuccess(_)).Times(1);
+    ctrl.run();
+
+    auto s = repo.findById("S-001");
+    ASSERT_TRUE(s.has_value());
+    EXPECT_DOUBLE_EQ(s->avgProductionTime, 0.05);
+}
+
+// 극소값 avgTime (0.001 min/ea) → 정상 등록
+TEST_F(SampleControllerTest, RegisterSampleWithTinyDecimalAvgTimeSucceeds) {
+    NiceMock<MockSampleView> view;
+    std::istringstream in("1\nS-001\nTest\n0.001\n0.9\n0\n");
+    SampleController ctrl(in, view, repo);
+
+    EXPECT_CALL(view, showRegisterSuccess(_)).Times(1);
+    ctrl.run();
+
+    auto s = repo.findById("S-001");
+    ASSERT_TRUE(s.has_value());
+    EXPECT_DOUBLE_EQ(s->avgProductionTime, 0.001);
+}
+
 // 수율 임계값보다 낮은 시료만 존재할 때 수율 검색 → 결과 없음
 TEST_F(SampleControllerTest, SearchByYieldWithHighThresholdShowsNoResults) {
     repo.add({"S-001", "저수율 시료", 0.5, 0.5, 0});
