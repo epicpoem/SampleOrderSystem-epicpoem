@@ -593,3 +593,55 @@
 - 리뷰 의견 반영
 - SPEC PDF 문서의 15,19,21,23 페이지 그림 재확인, 최대한 비슷하게 구현 Update
 
+---
+
+## [2026-06-12] PDF 스펙 기반 UI 개선 및 생산라인 조회 버그 수정
+
+### 작업 내용
+
+**시료 주문 화면 (PDF 15p)**
+- `IOrderView::showOrderConfirmation`: sampleId 단독 → (sampleId, sampleName, customerName, qty) 4인자로 변경
+- `OrderView::showOrderConfirmation`: 시료명(시료ID) 형식으로 표시, "[입력 내용 확인]" 헤더
+- `OrderView::showConfirmPrompt`: "[Y] 예약 접수   [N] 취소 / 선택 >" 형식
+- `OrderView::showOrderSuccess`: "예약 접수 완료." + 주문번호/상태/※ 재고 확인 안내
+- `OrderView::showPressEnterPrompt`: 예약 접수 완료 후 "선택 >" 대기 후 복귀
+- `OrderController`: showOrderConfirmation에 sampleName 조회 후 전달
+
+**모니터링 화면 (PDF 19p)**
+- `IMonitorView::showMenu`: timestamp 인자 추가
+- `MonitorController`: `stockService_.now()` + `localtime_s`로 타임스탬프 생성 → showMenu 전달
+- `MonitorView::showMenu`: `[4] 모니터링   YYYY-MM-DD HH:MM:SS` 형식 헤더
+- `MonitorView::showOrderStats`: PRODUCING > 0 시 "← 생산라인 대기" 표시
+- 화면 표시 후 "선택 >" Enter 대기 후 메인 복귀
+
+**생산라인 조회 화면 (PDF 21p) + 대기 주문 버그 수정**
+- `IProductionView::showQueueItem`: shortageQty, estimatedCompletion 인자 추가 (4→5인자)
+- `ProductionView::showCurrentProduction`: 주문번호/시료/주문량/부족/실생산량/총생산시간 + 진행률 바 + 완료 예정 HH:MM
+- `ProductionView::showQueueItem`: 순서/주문번호/시료/주문량/부족분/실생산량/예상완료 표 형식
+- `ProductionView::showPressEnterPrompt`: 부족분/실생산량 공식 안내 + "선택 >" 대기
+- **버그 수정**: 대기 주문 예상 완료 시간을 각자 productionStartTime 기준이 아닌 현재 주문 완료 기준 누적 계산으로 수정
+- `Order::shortageQty` 필드 추가, `JsonOrderRepository`에 직렬화 반영
+- `ApprovalController`: PRODUCING 전환 시 `shortageQty` 저장
+
+**출고 처리 화면 (PDF 23p)**
+- `IReleaseView::showConfirmedOrderList`: sampleNames 인자 추가 (1→2인자)
+- `ReleaseView::showConfirmedOrderList`: 주문번호/고객/시료명/수량 형식 (시료ID 대신 시료명)
+- `ReleaseView::showReleaseCompleted`: "출고 처리 완료." + 주문번호/출고수량/처리일시/상태 표시
+- `ReleaseController`: sampleRepo에서 시료명 조회 후 showConfirmedOrderList 전달
+- 화면 표시 후 "선택 >" Enter 대기 후 복귀
+
+**주문 승인/거절 (리뷰 반영)**
+- `ApprovalController::run()`: showApprovalMenu() 호출 후 빈 목록 체크 → Enter 대기 후 복귀
+
+### 커밋
+- `053273b` [AI-Feature] PDF 스펙 기반 UI 개선 및 생산라인 조회 버그 수정
+
+### 리뷰 요청
+- 빌드 성공, 130/130 테스트 전부 통과 확인되었습니다.
+- [2] 시료 주문: 입력 확인 화면에서 시료명(시료ID) 형식 및 "[Y] 예약 접수 [N] 취소 / 선택 >" 동작 확인 요청
+- [3] 주문 승인/거절: 빈 목록 시 헤더 → 에러메시지 → Enter 대기 후 메인 복귀 동작 확인 요청
+- [4] 모니터링: 타임스탬프 헤더, PRODUCING 시 "← 생산라인 대기" 표시, Enter 대기 후 복귀 확인 요청
+- [5] 생산라인 조회: 현재 주문 진행률 바 + 완료 예정 시각, 대기 주문 누적 완료 시각 확인 요청
+- [6] 출고 처리: CONFIRMED 목록에 시료명 표시, 출고 완료 화면, Enter 대기 후 복귀 확인 요청
+- 추가 보완 필요한 화면이 있으면 지시 부탁드립니다.
+
